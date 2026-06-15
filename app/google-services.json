@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128404702393",
+    "project_id": "techflow-bef93",
+    "storage_bucket": "techflow-bef93.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128404702393:android:a6659b5d7b969364674768",
+        "android_client_info": {
+          "package_name": "com.techflow.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9YRuau2wrN7XTXDebO_v0CcWFzfr6bog"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
