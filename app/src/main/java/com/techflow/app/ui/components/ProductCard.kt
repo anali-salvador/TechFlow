@@ -3,6 +3,7 @@ package com.techflow.app.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -31,14 +32,16 @@ fun ProductCard(
     product: Product,
     onClick: () -> Unit
 ) {
+    val categoryColor = getCategoryColor(product.categoria)
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.elevatedCardColors(containerColor = SurfaceLight)
     ) {
         Row(
             modifier = Modifier
@@ -46,17 +49,17 @@ fun ProductCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Estructura Izquierda: Icono dinámico según categoría
+            // Estructura Izquierda: Icono dinámico según categoría dentro de un círculo vibrante
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(IconBoxBg, RoundedCornerShape(10.dp)),
+                    .background(categoryColor.copy(alpha = 0.18f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = getCategoryIcon(product.categoria),
                     contentDescription = null,
-                    tint = IconBoxTint,
+                    tint = categoryColor,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -114,7 +117,7 @@ fun ProductCard(
     }
 }
 
-private fun getCategoryIcon(categoria: String): ImageVector {
+fun getCategoryIcon(categoria: String): ImageVector {
     return when (categoria.lowercase()) {
         "laptop" -> Icons.Default.Laptop
         "celular" -> Icons.Default.Smartphone

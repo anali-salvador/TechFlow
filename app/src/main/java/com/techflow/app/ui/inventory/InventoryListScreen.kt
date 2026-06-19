@@ -1,5 +1,6 @@
 package com.techflow.app.ui.inventory
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -13,15 +14,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techflow.app.R
 import com.techflow.app.ui.components.ErrorMessage
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.ProductCard
 import com.techflow.app.ui.components.StaggeredVisibility
+import com.techflow.app.ui.theme.HealthyStockGreen
+import com.techflow.app.ui.theme.LowStockOrange
+import com.techflow.app.ui.theme.OnSurfaceVariantLight
+import com.techflow.app.ui.theme.PrimaryBlue
 import com.techflow.app.viewmodel.InventoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,13 +50,13 @@ fun InventoryListScreen(
                 title = {
                     Text(
                         text = "TechFlow",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = Color.White
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -93,46 +101,186 @@ fun InventoryListScreen(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            Text(
-                text = "Inventario de Productos",
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item {
+                val lowStockCount = uiState.products.count { it.cantidad <= it.stockMinimo }
+                val totalValue = uiState.products.sumOf { it.precio * it.cantidad }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.fondo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .matchParentSize(),
+                        contentScale = ContentScale.Crop,
+                        alpha = 0.4f
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Bienvenido a",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = OnSurfaceVariantLight
+                        )
+                        Text(
+                            text = "TechFlow",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryBlue
+                        )
+                        Text(
+                            text = "Gestión de Inventario Tecnológico",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnSurfaceVariantLight
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            QuickStatCard(
+                                modifier = Modifier.weight(1f),
+                                backgroundColor = PrimaryBlue.copy(alpha = 0.15f),
+                                value = "${uiState.products.size}",
+                                valueColor = PrimaryBlue,
+                                label = "Productos"
+                            )
+                            QuickStatCard(
+                                modifier = Modifier.weight(1f),
+                                backgroundColor = LowStockOrange.copy(alpha = 0.15f),
+                                value = "$lowStockCount",
+                                valueColor = LowStockOrange,
+                                label = "Stock bajo"
+                            )
+                            QuickStatCard(
+                                modifier = Modifier.weight(1f),
+                                backgroundColor = HealthyStockGreen.copy(alpha = 0.15f),
+                                value = "S/. ${"%.2f".format(totalValue)}",
+                                valueColor = HealthyStockGreen,
+                                label = "Valor total"
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = OnSurfaceVariantLight.copy(alpha = 0.2f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Text(
+                    text = "Mis Productos",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             when {
-                uiState.isLoading -> LoadingIndicator()
+                uiState.isLoading -> {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LoadingIndicator()
+                        }
+                    }
+                }
                 uiState.errorMessage != null -> {
-                    ErrorMessage(
-                        message = uiState.errorMessage!!,
-                        onRetry = { viewModel.loadProducts() }
-                    )
+                    item {
+                        ErrorMessage(
+                            message = uiState.errorMessage!!,
+                            onRetry = { viewModel.loadProducts() }
+                        )
+                    }
                 }
                 uiState.products.isEmpty() -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No hay productos registrados", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No hay productos registrados",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        itemsIndexed(
-                            items = uiState.products,
-                            key = { _, product -> product.id }
-                        ) { index, product ->
-                            StaggeredVisibility(index = index) {
-                                ProductCard(product = product) {
-                                    onProductClick(product.id)
-                                }
+                    itemsIndexed(
+                        items = uiState.products,
+                        key = { _, product -> product.id }
+                    ) { index, product ->
+                        StaggeredVisibility(index = index) {
+                            ProductCard(product = product) {
+                                onProductClick(product.id)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun QuickStatCard(
+    modifier: Modifier = Modifier,
+    backgroundColor: Color,
+    value: String,
+    valueColor: Color,
+    label: String
+) {
+    Card(
+        modifier = modifier.height(80.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = valueColor
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = OnSurfaceVariantLight
+            )
         }
     }
 }

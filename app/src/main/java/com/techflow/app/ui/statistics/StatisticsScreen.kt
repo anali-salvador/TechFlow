@@ -45,7 +45,9 @@ import com.techflow.app.ui.components.StaggeredVisibility
 import com.techflow.app.ui.components.StockBadge
 import com.techflow.app.ui.components.getCategoryColor
 import com.techflow.app.ui.theme.ErrorRed
+import com.techflow.app.ui.theme.OnSurfaceLight
 import com.techflow.app.ui.theme.SuccessGreen
+import com.techflow.app.ui.theme.SurfaceLight
 import com.techflow.app.viewmodel.StatisticsViewModel
 
 // StatisticsScreen - Pantalla 6 del expediente técnico (Estadísticas)
@@ -238,7 +240,7 @@ private fun CategoryDonutChart(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -248,6 +250,7 @@ private fun CategoryDonutChart(
                 text = "Distribución por Categorías",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = OnSurfaceLight,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
             )
@@ -333,17 +336,17 @@ private fun StatCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono circular de color a la izquierda
+            // Ícono circular de color vibrante a la izquierda
             Surface(
                 modifier = Modifier.size(52.dp),
                 shape = CircleShape,
-                color = iconColor.copy(alpha = 0.15f)
+                color = iconColor.copy(alpha = 0.18f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -360,13 +363,15 @@ private fun StatCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    color = OnSurfaceLight
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = value,
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = OnSurfaceLight
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

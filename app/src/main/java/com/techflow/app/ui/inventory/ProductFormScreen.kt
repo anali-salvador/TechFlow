@@ -11,11 +11,14 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techflow.app.domain.model.Product
+import com.techflow.app.ui.theme.PrimaryBlue
 import com.techflow.app.viewmodel.InventoryViewModel
 
 // ProductFormScreen - Pantalla 4 del expediente técnico (Formulario Agregar / Editar)
@@ -56,6 +59,17 @@ fun ProductFormScreen(
 
     // Categorías disponibles según el expediente técnico
     val categorias = listOf("Laptop", "Celular", "Accesorio", "Componente", "Tablet", "Monitor", "Periférico", "Otro")
+
+    // Colores compartidos por todos los campos del formulario: borde y texto en azul/blanco vibrante
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = PrimaryBlue,
+        unfocusedBorderColor = PrimaryBlue.copy(alpha = 0.6f),
+        focusedLabelColor = PrimaryBlue,
+        unfocusedLabelColor = PrimaryBlue.copy(alpha = 0.8f),
+        cursorColor = PrimaryBlue,
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White
+    )
 
     // Si es edición y el producto ya se cargó, precarga los campos
     LaunchedEffect(uiState.selectedProduct) {
@@ -127,7 +141,8 @@ fun ProductFormScreen(
                 } else null,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                colors = fieldColors
             )
 
             // Campo Categoría - dropdown con opciones predefinidas
@@ -148,7 +163,8 @@ fun ProductFormScreen(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    colors = fieldColors
                 )
                 ExposedDropdownMenu(
                     expanded = expandedCategoria,
@@ -177,7 +193,8 @@ fun ProductFormScreen(
                 } else null,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                colors = fieldColors
             )
 
             // Campo Precio - solo números decimales
@@ -192,7 +209,8 @@ fun ProductFormScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                colors = fieldColors
             )
 
             // Cantidad y Stock mínimo en la misma fila
@@ -212,7 +230,8 @@ fun ProductFormScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f),
-                    singleLine = true
+                    singleLine = true,
+                    colors = fieldColors
                 )
                 // Campo Stock Mínimo - cuando cantidad <= este valor se dispara la alerta
                 OutlinedTextField(
@@ -226,7 +245,8 @@ fun ProductFormScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f),
-                    singleLine = true
+                    singleLine = true,
+                    colors = fieldColors
                 )
             }
 
@@ -239,7 +259,8 @@ fun ProductFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp),
-                maxLines = 4
+                maxLines = 4,
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -277,7 +298,11 @@ fun ProductFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
-                enabled = true
+                enabled = true,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryBlue,
+                    contentColor = Color.White
+                )
             ) {
                 Text(
                     text = if (isEditing) "Actualizar Producto" else "Guardar Producto",
@@ -288,7 +313,9 @@ fun ProductFormScreen(
             // Botón Cancelar - vuelve sin guardar
             OutlinedButton(
                 onClick = onBackClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(1.dp, PrimaryBlue),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue)
             ) {
                 Text(text = "Cancelar")
             }

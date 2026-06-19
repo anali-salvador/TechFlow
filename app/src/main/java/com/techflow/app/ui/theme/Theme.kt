@@ -1,56 +1,31 @@
 package com.techflow.app.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
+private val AppDarkColorScheme = darkColorScheme(
     primary = PrimaryBlue,
-    onPrimary = DeepNavy,
+    onPrimary = OnSurfaceLight,
     primaryContainer = PrimaryBlueDark,
-    onPrimaryContainer = BackgroundLight,
-    background = BackgroundDark,
-    surface = SurfaceDark,
-    onBackground = OnSurfaceDark,
-    onSurface = OnSurfaceDark,
-    onSurfaceVariant = OnSurfaceVariantDark,
-    error = ErrorRed
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = PrimaryBlue,
-    onPrimary = SurfaceLight,
-    primaryContainer = IconBoxBg,
-    onPrimaryContainer = PrimaryBlueDark,
+    onPrimaryContainer = OnSurfaceLight,
     secondary = PrimaryBlue,
     background = BackgroundLight,
     surface = SurfaceLight,
-    onBackground = DeepNavy,
-    onSurface = DeepNavy,
-    onSurfaceVariant = SlateGray,
-    error = ErrorRed
+    onBackground = OnSurfaceLight,
+    onSurface = OnSurfaceLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    error = ErrorRed,
+    errorContainer = ErrorRed
 )
 
 @Composable
 fun TechFlowTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disabled to enforce brand identity
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled to enforce brand identity (fondo siempre negro)
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = AppDarkColorScheme,
         typography = Typography,
         content = content
     )

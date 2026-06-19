@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,10 @@ import coil.compose.AsyncImage
 import com.techflow.app.ui.components.ErrorMessage
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.StaggeredVisibility
+import com.techflow.app.ui.theme.OnSurfaceLight
+import com.techflow.app.ui.theme.OnSurfaceVariantLight
+import com.techflow.app.ui.theme.PrimaryBlue
+import com.techflow.app.ui.theme.SurfaceLight
 import com.techflow.app.viewmodel.ExploreViewModel
 
 // ExploreScreen - Pantalla 5 del expediente técnico (Explorar / Búsqueda por API)
@@ -106,14 +111,28 @@ fun ExploreScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar"
+                            contentDescription = "Buscar",
+                            tint = PrimaryBlue
                         )
-                    }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = SurfaceLight,
+                        unfocusedContainerColor = SurfaceLight,
+                        focusedBorderColor = PrimaryBlue,
+                        unfocusedBorderColor = PrimaryBlue.copy(alpha = 0.5f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = PrimaryBlue
+                    )
                 )
                 // Botón que dispara la búsqueda en la API
                 FilledIconButton(
                     onClick = { viewModel.searchProducts() },
-                    shape = CircleShape
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = PrimaryBlue,
+                        contentColor = Color.White
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -161,7 +180,8 @@ fun ExploreScreen(
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(16.dp),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                    colors = CardDefaults.cardColors(containerColor = SurfaceLight)
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(12.dp),
@@ -187,6 +207,7 @@ fun ExploreScreen(
                                             Text(
                                                 text = apiProduct.title,
                                                 style = MaterialTheme.typography.titleSmall,
+                                                color = OnSurfaceLight,
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis
                                             )
@@ -194,13 +215,13 @@ fun ExploreScreen(
                                             Text(
                                                 text = apiProduct.category,
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = OnSurfaceVariantLight
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text(
                                                 text = "S/. ${"%.2f".format(apiProduct.price)}",
                                                 style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = PrimaryBlue
                                             )
                                         }
 
@@ -216,7 +237,11 @@ fun ExploreScreen(
                                                     category = apiProduct.category
                                                 )
                                             },
-                                            shape = CircleShape
+                                            shape = CircleShape,
+                                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                                containerColor = PrimaryBlue.copy(alpha = 0.2f),
+                                                contentColor = PrimaryBlue
+                                            )
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Add,

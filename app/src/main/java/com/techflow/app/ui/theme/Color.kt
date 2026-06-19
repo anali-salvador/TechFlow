@@ -3,46 +3,54 @@ package com.techflow.app.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * TechFlow Professional SaaS Palette
- * Estética corporativa moderna basada en contrastes profundos y fondos limpios.
+ * TechFlow Dark Mode Palette
+ * Fondo negro profundo con acentos vibrantes/neón para una estética moderna.
  */
 
-// Fondo y Superficie (Gris Pizarra Ultra Claro y Blanco Puro)
-val BackgroundLight = Color(0xFFF8FAFC)
-val SurfaceLight = Color(0xFFFFFFFF)
+// Fondo y Superficie
+val BackgroundLight = Color(0xFF0F0F0F)
+val SurfaceLight = Color(0xFF1A1A2E)
 
-// Textos y Contraste (Azul Marino Profundo para máxima legibilidad)
-val DeepNavy = Color(0xFF0F172A)
-val SlateGray = Color(0xFF64748B)
+// Textos y Contraste
+val OnSurfaceLight = Color(0xFFEEEEEE)
+val OnSurfaceVariantLight = Color(0xFFB0B0B0)
 
-// Colores Primarios (Azul Tecnológico Brillante)
-val PrimaryBlue = Color(0xFF0284C7)
-val PrimaryBlueDark = Color(0xFF075985)
+// Colores Primarios
+val PrimaryBlue = Color(0xFF00B4D8)
+val PrimaryBlueDark = Color(0xFF0077B6)
 
 // Contenedores de Iconos
-val IconBoxBg = Color(0xFFF1F5F9)
-val IconBoxTint = Color(0xFF475569)
+val IconBoxBg = Color(0xFF16213E)
+val IconBoxTint = Color(0xFF00B4D8)
 
-// Semántica de Stock (Vibrantes con excelente contraste sobre blanco)
-val LowStockOrange = Color(0xFFEA580C)
-val HealthyStockGreen = Color(0xFF16A34A)
-
-// Modo Oscuro (Profesional Dark Mode)
-val BackgroundDark = Color(0xFF0F172A)
-val SurfaceDark = Color(0xFF1E293B)
-val OnSurfaceDark = Color(0xFFF8FAFC)
-val OnSurfaceVariantDark = Color(0xFF94A3B8)
+// Semántica de Stock
+val LowStockOrange = Color(0xFFFF6B35)
+val HealthyStockGreen = Color(0xFF06D6A0)
 
 // Compatibility/Specific UI elements
-val SuccessGreen = Color(0xFF16A34A)
-val ErrorRed = Color(0xFFBA1A1A)
+val ErrorRed = Color(0xFFEF476F)
+val SuccessGreen = Color(0xFF06D6A0)
 
-// Category Colors - Refined
-val CatBlue = Color(0xFF0284C7)
-val CatPurple = Color(0xFF7E4895)
-val CatGreen = Color(0xFF006D3B)
-val CatOrange = Color(0xFF914D00)
-val CatCyan = Color(0xFF006A6A)
-val CatIndigo = Color(0xFF4359A9)
-val CatRose = Color(0xFF9C4260)
-val CatSlate = Color(0xFF535F70)
+// Dark theme aliases (la app siempre usa esta paleta oscura)
+val BackgroundDark = BackgroundLight
+val SurfaceDark = SurfaceLight
+val OnSurfaceDark = OnSurfaceLight
+val OnSurfaceVariantDark = OnSurfaceVariantLight
+
+// Cards del menú principal (dashboard)
+val CardBlue = Color(0xFF0077B6)
+val CardGreen = Color(0xFF06D6A0)
+val CardOrange = Color(0xFFFF6B35)
+val CardPurple = Color(0xFF7209B7)
+val CardRed = Color(0xFFEF476F)
+val CardCyan = Color(0xFF00B4D8)
+
+// Category Colors - vibrantes sobre fondo oscuro
+val CatBlue = CardBlue
+val CatPurple = CardPurple
+val CatGreen = CardGreen
+val CatOrange = CardOrange
+val CatCyan = CardCyan
+val CatIndigo = Color(0xFF4361EE)
+val CatRose = CardRed
+val CatSlate = Color(0xFF8D99AE)
