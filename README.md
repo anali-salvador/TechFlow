@@ -74,13 +74,3 @@ Usuario toca botón → Vista llama función del ViewModel → ViewModel llama a
 | userId | String | UID del usuario propietario |
 | fechaRegistro | Long | Timestamp de creación |
 
-## Cómo ejecutar
-1. Clonar el repositorio
-2. Abrir con Android Studio
-3. Colocar el archivo google-services.json en la carpeta app/
-4. Sincronizar Gradle
-5. Ejecutar en emulador o dispositivo con API 26+
-
-## Estado del proyecto
-- Parte 1 completada — CRUD con Room, Retrofit, MVVM, Navigation Compose
-- Parte 2 pendiente — Firebase Auth, Firestore, Notificaciones locales y push
