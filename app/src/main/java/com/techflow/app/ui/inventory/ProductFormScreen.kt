@@ -2,10 +2,13 @@ package com.techflow.app.ui.inventory
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -89,6 +92,13 @@ fun ProductFormScreen(
                         )
                     }
                 },
+                actions = {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Edit else Icons.Default.AddCircle,
+                        contentDescription = if (isEditing) "Editando producto" else "Nuevo producto",
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -115,6 +125,7 @@ fun ProductFormScreen(
                 supportingText = if (showErrors && !isNombreValid) {
                     { Text("El nombre es obligatorio") }
                 } else null,
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -134,9 +145,10 @@ fun ProductFormScreen(
                         { Text("Selecciona una categoría") }
                     } else null,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategoria) },
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(
                     expanded = expandedCategoria,
@@ -163,6 +175,7 @@ fun ProductFormScreen(
                 supportingText = if (showErrors && !isMarcaValid) {
                     { Text("La marca es obligatoria") }
                 } else null,
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -177,6 +190,7 @@ fun ProductFormScreen(
                     { Text("Ingresa un precio válido") }
                 } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -196,6 +210,7 @@ fun ProductFormScreen(
                         { Text("Inválido") }
                     } else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -209,6 +224,7 @@ fun ProductFormScreen(
                         { Text("Inválido") }
                     } else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -219,6 +235,7 @@ fun ProductFormScreen(
                 value = descripcion,
                 onValueChange = { descripcion = it },
                 label = { Text("Descripción (opcional)") },
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp),
@@ -256,10 +273,16 @@ fun ProductFormScreen(
                         onBackClick() // Vuelve a la lista después de guardar
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
                 enabled = true
             ) {
-                Text(text = if (isEditing) "Actualizar Producto" else "Guardar Producto")
+                Text(
+                    text = if (isEditing) "Actualizar Producto" else "Guardar Producto",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
 
             // Botón Cancelar - vuelve sin guardar

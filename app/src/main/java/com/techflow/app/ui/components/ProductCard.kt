@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -98,7 +98,7 @@ fun ProductCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = "Ver detalle",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp)
@@ -111,13 +111,13 @@ fun ProductCard(
 // Función que retorna el color según la categoría del producto
 fun getCategoryColor(categoria: String): Color {
     return when (categoria.lowercase()) {
-        "laptop" -> CategoryLaptop
-        "celular" -> CategoryCelular
-        "accesorio" -> CategoryAccesorio
-        "componente" -> CategoryComponente
-        "tablet" -> CategoryTablet
-        "monitor" -> CategoryMonitor
-        "periférico" -> CategoryPeriferico
-        else -> CategoryOtro
+        "laptop" -> CatBlue
+        "celular" -> CatPurple
+        "accesorio" -> CatOrange
+        "componente" -> CatGreen
+        "tablet" -> CatCyan
+        "monitor" -> CatIndigo
+        "periférico" -> CatRose
+        else -> CatSlate
     }
 }

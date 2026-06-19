@@ -6,55 +6,51 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-// Esquema de colores oscuro personalizado para TechFlow
 private val DarkColorScheme = darkColorScheme(
-    primary = TechBlueLight,
-    onPrimary = BackgroundDark,
-    primaryContainer = TechBlueDark,
-    onPrimaryContainer = TechBlueSurface,
-    secondary = TechGreenLight,
-    tertiary = TechBlueLight,
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    tertiaryContainer = TertiaryContainerDark,
+    onTertiaryContainer = OnTertiaryContainerDark,
     background = BackgroundDark,
     surface = SurfaceDark,
-    onBackground = OnSurfaceDark,
-    onSurface = OnSurfaceDark,
-    onSurfaceVariant = OnSurfaceVariantDark,
-    error = TechRedLight,
-    errorContainer = TechRed,
-    onErrorContainer = TechRedLight
+    error = ErrorRed,
+    outline = OutlineLight // Simplified for dark
 )
 
-// Esquema de colores claro personalizado para TechFlow
-// Azul tecnológico como primary - profesional y moderno
 private val LightColorScheme = lightColorScheme(
-    primary = TechBlue,
-    onPrimary = SurfaceLight,
-    primaryContainer = TechBlueSurface,
-    onPrimaryContainer = TechBlueDark,
-    secondary = TechGreen,
-    secondaryContainer = TechGreenLight,
-    tertiary = TechBlueLight,
+    primary = PrimaryLight,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryContainerLight,
+    onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryContainerLight,
+    onSecondaryContainer = OnSecondaryContainerLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
+    tertiaryContainer = TertiaryContainerLight,
+    onTertiaryContainer = OnTertiaryContainerLight,
     background = BackgroundLight,
     surface = SurfaceLight,
-    onBackground = OnSurfaceLight,
-    onSurface = OnSurfaceLight,
-    onSurfaceVariant = OnSurfaceVariantLight,
-    error = TechRed,
-    errorContainer = TechRedLight,
-    onErrorContainer = TechRed
+    error = ErrorRed,
+    outline = OutlineLight
 )
 
-// TechFlowTheme - tema global de la app que aplica los colores y tipografía
-// Se usa en MainActivity envolviendo toda la UI
-// Soporta modo claro/oscuro automáticamente según la configuración del dispositivo
 @Composable
 fun TechFlowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true, // Enabled by default for modern look
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        // Dynamic Color usa los colores del wallpaper del usuario (Android 12+)
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context)

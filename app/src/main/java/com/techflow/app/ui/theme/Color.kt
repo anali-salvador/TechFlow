@@ -2,39 +2,68 @@ package com.techflow.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta de colores personalizada para TechFlow
-// Azul tecnológico como color principal - transmite confianza y profesionalismo
-val TechBlue = Color(0xFF1565C0)
-val TechBlueDark = Color(0xFF0D47A1)
-val TechBlueLight = Color(0xFF42A5F5)
-val TechBlueSurface = Color(0xFFE3F2FD)
+// TechFlow Professional M3 Palette
 
-// Colores de acento - verde para acciones positivas
-val TechGreen = Color(0xFF2E7D32)
-val TechGreenLight = Color(0xFFA5D6A7)
+// Primary: Deep Navy/Teal for a tech-focused, trust-building brand
+val PrimaryLight = Color(0xFFD661EA)
+val OnPrimaryLight = Color(0xFF50AAEF)
+val PrimaryContainerLight = Color(0xFFA9E39E)
+val OnPrimaryContainerLight = Color(0xFF001E30)
 
-// Colores de alerta - rojo para stock bajo y errores
-val TechRed = Color(0xFFC62828)
-val TechRedLight = Color(0xFFFFCDD2)
+// Secondary: Subtle Indigo for accents
+val SecondaryLight = Color(0xFF50606E)
+val OnSecondaryLight = Color(0xFFF69696)
+val SecondaryContainerLight = Color(0xFFD3E5F5)
+val OnSecondaryContainerLight = Color(0xFF0C1D29)
 
-// Colores de fondo y superficie
-val BackgroundLight = Color(0xFFF8F9FA)
-val SurfaceLight = Color(0xFFFFFFFF)
-val OnSurfaceLight = Color(0xFF1A1C1E)
-val OnSurfaceVariantLight = Color(0xFF44474E)
+// Tertiary: Sophisticated Mint for success states
+val TertiaryLight = Color(0xFF006B5A)
+val OnTertiaryLight = Color(0xFFFFFFFF)
+val TertiaryContainerLight = Color(0xFF7CF8DB)
+val OnTertiaryContainerLight = Color(0xFF00201A)
 
-// Colores para modo oscuro
+// Neutral Surfaces: Slightly tinted for depth
+val BackgroundLight = Color(0xFFF8F9FF) // Cold tint for "tech" feel
+val SurfaceLight = Color(0xFFFEFCFF)
+val OutlineLight = Color(0xFF71777F)
+
+// Dark Theme Palette
+val PrimaryDark = Color(0xFF8FCDFF)
+val OnPrimaryDark = Color(0xFF003450)
+val PrimaryContainerDark = Color(0xFF004B70)
+val OnPrimaryContainerDark = Color(0xFFCBE6FF)
+
+val SecondaryDark = Color(0xFFB7C9D9)
+val OnSecondaryDark = Color(0xFF22323F)
+val SecondaryContainerDark = Color(0xFF384956)
+val OnSecondaryContainerDark = Color(0xFFD3E5F5)
+
+val TertiaryDark = Color(0xFF5DDBBF)
+val OnTertiaryDark = Color(0xFF00382E)
+val TertiaryContainerDark = Color(0xFF005143)
+val OnTertiaryContainerDark = Color(0xFF7CF8DB)
+
 val BackgroundDark = Color(0xFF1A1C1E)
-val SurfaceDark = Color(0xFF2B2D30)
-val OnSurfaceDark = Color(0xFFE2E2E6)
-val OnSurfaceVariantDark = Color(0xFFC4C6CF)
+val SurfaceDark = Color(0xFF1A1C1E)
 
-// Colores para categorías de productos (iconos y badges)
-val CategoryLaptop = Color(0xFF1565C0)
-val CategoryCelular = Color(0xFF7B1FA2)
-val CategoryAccesorio = Color(0xFFE65100)
-val CategoryComponente = Color(0xFF2E7D32)
-val CategoryTablet = Color(0xFF00838F)
-val CategoryMonitor = Color(0xFF4527A0)
-val CategoryPeriferico = Color(0xFFC62828)
-val CategoryOtro = Color(0xFF546E7A)
+// Semantic colors (Professional gradients/shades)
+val SuccessGreen = Color(0xFF2E7D32)
+val WarningOrange = Color(0xFFE65100)
+val ErrorRed = Color(0xFFBA1A1A)
+
+// Category Colors - Refined and consistent
+val CatBlue = Color(0xFF006494)
+val CatPurple = Color(0xFF7E4895)
+val CatGreen = Color(0xFF006D3B)
+val CatOrange = Color(0xFF914D00)
+val CatCyan = Color(0xFF006A6A)
+val CatIndigo = Color(0xFF4359A9)
+val CatRose = Color(0xFF9C4260)
+val CatSlate = Color(0xFF535F70)
+
+// TechFlow Brand Tokens - usados en alertas y superficies destacadas
+val TechBlue = Color(0xFF006494)
+val TechRed = Color(0xFFBA1A1A)
+val TechGreen = Color(0xFF2E7D32)
+val TechRedLight = Color(0xFFFFEBEE)
+val TechBlueSurface = Color(0xFFE3F2FD)

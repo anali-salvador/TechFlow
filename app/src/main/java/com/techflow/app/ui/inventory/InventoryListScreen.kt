@@ -2,24 +2,29 @@ package com.techflow.app.ui.inventory
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techflow.app.ui.components.ErrorMessage
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.ProductCard
+import com.techflow.app.ui.components.StaggeredVisibility
 import com.techflow.app.viewmodel.InventoryViewModel
 
 // InventoryListScreen - Pantalla 2 del expediente técnico (Pantalla Principal)
 // Lista de productos con LazyColumn, botón flotante para agregar
-// Menú superior con opciones de Explorar, Estadísticas y Cerrar sesión
+// Barra de navegación inferior con Inventario, Explorar y Estadísticas
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryListScreen(
@@ -31,48 +36,38 @@ fun InventoryListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Estado para controlar el menú desplegable
-    var showMenu by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("TechFlow - Inventario") },
-                actions = {
-                    // Botón de buscar que lleva a la pantalla Explorar
-                    IconButton(onClick = onExploreClick) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Explorar productos"
-                        )
-                    }
-                    // Menú desplegable con más opciones
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Más opciones"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Estadísticas") },
-                            onClick = {
-                                showMenu = false
-                                onStatisticsClick()
-                            }
-                        )
-                        // En la Parte 2 se agrega la opción de Cerrar sesión aquí
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = true,
+                    onClick = { /* ya estamos en Inventario */ },
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Inventario") },
+                    label = { Text("Inventario") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onExploreClick,
+                    icon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Explorar") },
+                    label = { Text("Explorar") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onStatisticsClick,
+                    icon = { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = "Estadísticas") },
+                    label = { Text("Estadísticas") }
+                )
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -101,14 +96,37 @@ fun InventoryListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "No tienes productos.\nPresiona + para agregar uno.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(
+                            modifier = Modifier.size(96.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "No tienes productos",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Presiona + para agregar tu primer producto",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
                 }
             }
             else -> {
@@ -118,14 +136,16 @@ fun InventoryListScreen(
                         .padding(paddingValues),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = uiState.products,
-                        key = { product -> product.id }
-                    ) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { onProductClick(product.id) }
-                        )
+                        key = { _, product -> product.id }
+                    ) { index, product ->
+                        StaggeredVisibility(index = index) {
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product.id) }
+                            )
+                        }
                     }
                 }
             }
