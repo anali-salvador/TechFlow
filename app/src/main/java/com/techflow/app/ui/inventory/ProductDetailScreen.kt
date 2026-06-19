@@ -34,8 +34,7 @@ import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.StaggeredVisibility
 import com.techflow.app.ui.components.StockBadge
 import com.techflow.app.ui.components.getCategoryColor
-import com.techflow.app.ui.theme.TechRed
-import com.techflow.app.ui.theme.TechRedLight
+import com.techflow.app.ui.theme.LowStockOrange
 import com.techflow.app.viewmodel.InventoryViewModel
 
 // ProductDetailScreen - Pantalla 3 del expediente técnico
@@ -106,10 +105,10 @@ fun ProductDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
@@ -169,7 +168,7 @@ fun ProductDetailScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = TechRedLight)
+                            colors = CardDefaults.cardColors(containerColor = LowStockOrange.copy(alpha = 0.1f))
                         ) {
                             Row(
                                 modifier = Modifier.padding(16.dp),
@@ -178,7 +177,7 @@ fun ProductDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.Warning,
                                     contentDescription = null,
-                                    tint = TechRed,
+                                    tint = LowStockOrange,
                                     modifier = Modifier.size(36.dp)
                                 )
                                 Spacer(modifier = Modifier.width(14.dp))
@@ -187,12 +186,12 @@ fun ProductDetailScreen(
                                         text = "Stock bajo",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = TechRed
+                                        color = LowStockOrange
                                     )
                                     Text(
                                         text = "Quedan ${product.cantidad} unidades (mínimo: ${product.stockMinimo})",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = TechRed
+                                        color = LowStockOrange
                                     )
                                 }
                             }

@@ -11,6 +11,8 @@ data class StatisticsUiState(
     val lowStockCount: Int = 0,
     // Valor total estimado del inventario (suma de precio x cantidad de cada producto)
     val totalInventoryValue: Double = 0.0,
+    // Distribución de productos por categoría para la gráfica
+    val categoryDistribution: Map<String, Int> = emptyMap(),
     // Lista de productos con stock bajo para mostrar con acceso rápido a su detalle
     val lowStockProducts: List<Product> = emptyList(),
     // true mientras se calculan las estadísticas

@@ -1,17 +1,24 @@
 package com.techflow.app.ui.components
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.Laptop
+import androidx.compose.material.icons.filled.SettingsInputComponent
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.TabletAndroid
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -19,96 +26,106 @@ import androidx.compose.ui.unit.sp
 import com.techflow.app.domain.model.Product
 import com.techflow.app.ui.theme.*
 
-// ProductCard - tarjeta profesional de producto con ícono de categoría y badge de stock
 @Composable
 fun ProductCard(
     product: Product,
     onClick: () -> Unit
 ) {
-    // Color según la categoría del producto
-    val categoryColor = getCategoryColor(product.categoria)
-
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
-            .animateContentSize(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .padding(12.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono circular con la inicial de la categoría
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = categoryColor.copy(alpha = 0.15f)
+            // Estructura Izquierda: Icono dinámico según categoría
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(IconBoxBg, RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = product.categoria.take(1).uppercase(),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = categoryColor
-                    )
-                }
+                Icon(
+                    imageVector = getCategoryIcon(product.categoria),
+                    contentDescription = null,
+                    tint = IconBoxTint,
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            // Información del producto
+            // Estructura Central: Nombre, Categoría y Precio
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = product.nombre,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "${product.categoria} · ${product.marca}",
+                    text = "${product.categoria} • ${product.marca}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "S/. ${"%.2f".format(product.precio)}",
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            // Badge de stock y flecha
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                StockBadge(
-                    cantidad = product.cantidad,
-                    stockMinimo = product.stockMinimo
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            // Estructura Derecha: Pastilla de Stock
+            Column(horizontalAlignment = Alignment.End) {
+                val isLowStock = product.cantidad <= 2
+                Surface(
+                    color = if (isLowStock) LowStockOrange else HealthyStockGreen,
+                    shape = RoundedCornerShape(50.dp)
+                ) {
+                    Text(
+                        text = "${product.cantidad} uds",
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Ver detalle",
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
     }
 }
 
-// Función que retorna el color según la categoría del producto
+private fun getCategoryIcon(categoria: String): ImageVector {
+    return when (categoria.lowercase()) {
+        "laptop" -> Icons.Default.Laptop
+        "celular" -> Icons.Default.Smartphone
+        "monitor" -> Icons.Default.Tv
+        "tablet" -> Icons.Default.TabletAndroid
+        "accesorio" -> Icons.Default.Headset
+        "componente" -> Icons.Default.SettingsInputComponent
+        else -> Icons.Default.Devices
+    }
+}
+
 fun getCategoryColor(categoria: String): Color {
     return when (categoria.lowercase()) {
         "laptop" -> CatBlue

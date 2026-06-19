@@ -7,47 +7,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryDark,
-    onPrimary = OnPrimaryDark,
-    primaryContainer = PrimaryContainerDark,
-    onPrimaryContainer = OnPrimaryContainerDark,
-    secondary = SecondaryDark,
-    onSecondary = OnSecondaryDark,
-    secondaryContainer = SecondaryContainerDark,
-    onSecondaryContainer = OnSecondaryContainerDark,
-    tertiary = TertiaryDark,
-    onTertiary = OnTertiaryDark,
-    tertiaryContainer = TertiaryContainerDark,
-    onTertiaryContainer = OnTertiaryContainerDark,
+    primary = PrimaryBlue,
+    onPrimary = DeepNavy,
+    primaryContainer = PrimaryBlueDark,
+    onPrimaryContainer = BackgroundLight,
     background = BackgroundDark,
     surface = SurfaceDark,
-    error = ErrorRed,
-    outline = OutlineLight // Simplified for dark
+    onBackground = OnSurfaceDark,
+    onSurface = OnSurfaceDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    error = ErrorRed
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryLight,
-    onPrimary = OnPrimaryLight,
-    primaryContainer = PrimaryContainerLight,
-    onPrimaryContainer = OnPrimaryContainerLight,
-    secondary = SecondaryLight,
-    onSecondary = OnSecondaryLight,
-    secondaryContainer = SecondaryContainerLight,
-    onSecondaryContainer = OnSecondaryContainerLight,
-    tertiary = TertiaryLight,
-    onTertiary = OnTertiaryLight,
-    tertiaryContainer = TertiaryContainerLight,
-    onTertiaryContainer = OnTertiaryContainerLight,
+    primary = PrimaryBlue,
+    onPrimary = SurfaceLight,
+    primaryContainer = IconBoxBg,
+    onPrimaryContainer = PrimaryBlueDark,
+    secondary = PrimaryBlue,
     background = BackgroundLight,
     surface = SurfaceLight,
-    error = ErrorRed,
-    outline = OutlineLight
+    onBackground = DeepNavy,
+    onSurface = DeepNavy,
+    onSurfaceVariant = SlateGray,
+    error = ErrorRed
 )
 
 @Composable
 fun TechFlowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true, // Enabled by default for modern look
+    dynamicColor: Boolean = false, // Disabled to enforce brand identity
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

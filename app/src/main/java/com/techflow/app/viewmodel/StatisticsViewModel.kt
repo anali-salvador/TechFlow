@@ -45,6 +45,10 @@ class StatisticsViewModel @Inject constructor(
                     // Calcula el valor total: suma de (precio * cantidad) de cada producto
                     val totalValue = allProducts.sumOf { it.precio * it.cantidad }
 
+                    // Calcula la distribución por categorías para la gráfica circular
+                    val categoryDist = allProducts.groupBy { it.categoria }
+                        .mapValues { it.value.size }
+
                     // Convierte las entidades de stock bajo a objetos Product
                     val lowStockProducts = lowStockEntities.map { entity -> entity.toDomain() }
 
@@ -53,6 +57,7 @@ class StatisticsViewModel @Inject constructor(
                         totalProducts = allProducts.size,
                         lowStockCount = lowStockEntities.size,
                         totalInventoryValue = totalValue,
+                        categoryDistribution = categoryDist,
                         lowStockProducts = lowStockProducts,
                         isLoading = false
                     )

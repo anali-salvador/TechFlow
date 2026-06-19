@@ -1,7 +1,21 @@
 package com.techflow.app.ui.statistics
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -18,8 +32,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,7 +53,7 @@ import com.techflow.app.viewmodel.StatisticsViewModel
 // Tarjeta con cantidad de productos con stock bajo (resaltados en rojo)
 // Tarjeta con valor total estimado del inventario (suma de precio x cantidad)
 // Lista de productos en riesgo de stock con acceso rápido a su detalle
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
@@ -47,8 +64,14 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Estadísticas") },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Estadísticas",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -57,9 +80,9 @@ fun StatisticsScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
@@ -117,6 +140,18 @@ fun StatisticsScreen(
                         }
                     }
 
+                    // Gráfica Circular: Distribución por categorías
+                    if (uiState.categoryDistribution.isNotEmpty()) {
+                        item {
+                            StaggeredVisibility(index = 3) {
+                                CategoryDonutChart(
+                                    categoryData = uiState.categoryDistribution,
+                                    totalItems = uiState.totalProducts
+                                )
+                            }
+                        }
+                    }
+
                     // Sección: Lista de productos en riesgo de stock
                     if (uiState.lowStockProducts.isNotEmpty()) {
                         item {
@@ -130,7 +165,7 @@ fun StatisticsScreen(
 
                         // Lista de productos con stock bajo con acceso rápido al detalle
                         itemsIndexed(uiState.lowStockProducts) { index, product ->
-                            StaggeredVisibility(index = index + 3) {
+                            StaggeredVisibility(index = index + 4) {
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -185,6 +220,98 @@ fun StatisticsScreen(
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Composable para la gráfica circular (Donut Chart) de categorías
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CategoryDonutChart(
+    categoryData: Map<String, Int>,
+    totalItems: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Distribución por Categorías",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Box(
+                modifier = Modifier.size(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.size(180.dp)) {
+                    var startAngle = -90f
+                    categoryData.forEach { (category, count) ->
+                        val sweepAngle = (count.toFloat() / totalItems) * 360f
+                        drawArc(
+                            color = getCategoryColor(category),
+                            startAngle = startAngle,
+                            sweepAngle = sweepAngle,
+                            useCenter = false,
+                            style = Stroke(width = 35f, cap = StrokeCap.Round)
+                        )
+                        startAngle += sweepAngle
+                    }
+                }
+                
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "$totalItems",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Total",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Leyenda de la gráfica
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                maxItemsInEachRow = 3
+            ) {
+                categoryData.forEach { (category, count) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(12.dp),
+                            shape = CircleShape,
+                            color = getCategoryColor(category)
+                        ) {}
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "$category ($count)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -285,7 +412,7 @@ private fun EmptyStatisticsState(modifier: Modifier = Modifier) {
                 text = "Agrega productos a tu inventario\npara ver tus estadísticas aquí",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
     }
