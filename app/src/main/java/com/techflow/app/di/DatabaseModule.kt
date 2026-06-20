@@ -2,6 +2,7 @@ package com.techflow.app.di
 
 import android.content.Context
 import androidx.room.Room
+import com.techflow.app.data.local.NotificationDao
 import com.techflow.app.data.local.ProductDao
 import com.techflow.app.data.local.TechFlowDatabase
 import dagger.Module
@@ -37,5 +38,12 @@ object DatabaseModule {
     @Singleton
     fun provideProductDao(database: TechFlowDatabase): ProductDao {
         return database.productDao()
+    }
+
+    // @Provides - le dice a Hilt CÓMO obtener el DAO del historial de notificaciones
+    @Provides
+    @Singleton
+    fun provideNotificationDao(database: TechFlowDatabase): NotificationDao {
+        return database.notificationDao()
     }
 }

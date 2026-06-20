@@ -85,6 +85,9 @@ dependencies {
     // Coroutines - operaciones asíncronas como consultar Room o llamar a la API
     implementation(libs.coroutines.android)
 
+    // Coroutines Play Services - convierte las Task de Firebase en funciones suspend con .await()
+    implementation(libs.coroutines.play.services)
+
     // Coil - carga imágenes desde URLs en los productos
     implementation(libs.coil.compose)
 

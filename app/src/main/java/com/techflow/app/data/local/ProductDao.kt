@@ -16,6 +16,11 @@ interface ProductDao {
     @Query("SELECT * FROM productos WHERE id = :id")
     suspend fun getProductById(id: Int): ProductEntity?
 
+    // @Query - busca un producto por su firestoreId para saber si ya fue sincronizado desde la nube
+    // Se usa al descargar los productos de Firestore, para no insertar duplicados en Room
+    @Query("SELECT * FROM productos WHERE firestoreId = :firestoreId AND userId = :userId")
+    suspend fun getProductByFirestoreId(firestoreId: String, userId: String): ProductEntity?
+
     // @Query - obtiene productos con cantidad <= stockMinimo para las estadísticas
     @Query("SELECT * FROM productos WHERE userId = :userId AND cantidad <= stockMinimo")
     fun getLowStockProducts(userId: String): Flow<List<ProductEntity>>

@@ -34,4 +34,7 @@ sealed class AppScreens(val route: String) {
     // Pantallas de autenticación (Parte 2 - Firebase Auth)
     object Login : AppScreens("login")
     object Register : AppScreens("register")
+
+    // Pantalla de historial de notificaciones (funcionalidad extra)
+    object NotificationHistory : AppScreens("notification_history")
 }

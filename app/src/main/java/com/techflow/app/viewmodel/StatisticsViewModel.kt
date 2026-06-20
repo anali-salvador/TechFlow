@@ -3,6 +3,7 @@ package com.techflow.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techflow.app.domain.model.toDomain
+import com.techflow.app.data.repository.AuthRepository
 import com.techflow.app.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,20 +13,23 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// @HiltViewModel - Hilt inyecta el ProductRepository para obtener los datos
+// @HiltViewModel - Hilt inyecta el ProductRepository y el AuthRepository para obtener los datos
 // Calcula las estadísticas del inventario: total, stock bajo y valor total
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatisticsUiState())
     val uiState: StateFlow<StatisticsUiState> = _uiState.asStateFlow()
 
-    // userId temporal - en la Parte 2 vendrá de Firebase Auth
-    private var currentUserId: String = "local_user"
+    // RF14 - cada usuario solo ve sus propias estadísticas
+    // currentUserId ahora viene del UID real de Firebase Auth, no de un valor hardcodeado
+    private var currentUserId: String = ""
 
     init {
+        currentUserId = authRepository.getCurrentUser()?.uid ?: ""
         loadStatistics()
     }
 

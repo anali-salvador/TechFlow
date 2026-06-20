@@ -3,6 +3,8 @@ package com.techflow.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techflow.app.data.local.ProductEntity
+import com.techflow.app.data.local.STOCK_MINIMO_GLOBAL
+import com.techflow.app.data.repository.AuthRepository
 import com.techflow.app.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,17 +13,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// @HiltViewModel - Hilt inyecta ProductRepository automáticamente
+// @HiltViewModel - Hilt inyecta ProductRepository y AuthRepository automáticamente
 // Este ViewModel maneja la búsqueda de productos en la API externa
 // y permite agregar productos encontrados al inventario local
-// ProductRepository es la ÚNICA fuente de datos (Room y API pasan por él)
+// ProductRepository es la ÚNICA fuente de datos (Room, API y Firestore pasan por él)
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExploreUiState())
     val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
+
+    // RF14 - cada usuario solo ve y gestiona sus propios productos
+    // currentUserId viene del UID real de Firebase Auth, no de un valor hardcodeado
+    private val currentUserId: String
+        get() = authRepository.getCurrentUser()?.uid ?: ""
 
     // Busca productos de electrónica en la API externa
     // Se llama cuando el usuario presiona el botón buscar o al entrar a la pantalla
@@ -59,7 +67,8 @@ class ExploreViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(searchQuery = query)
     }
 
-    // Agrega un producto de la API al inventario local en Room
+    // RF15 - el CRUD se sincroniza automáticamente en Cloud Firestore
+    // Agrega un producto de la API al inventario local en Room (fuente principal)
     // Convierte ProductApiResponse a ProductEntity con los campos del expediente técnico
     fun addProductToInventory(title: String, price: Double, description: String, category: String, imageUrl: String) {
         viewModelScope.launch {
@@ -71,13 +80,27 @@ class ExploreViewModel @Inject constructor(
                     marca = "Importado",
                     precio = price,
                     cantidad = 1,
-                    stockMinimo = 1,
+                    // Stock mínimo fijo del sistema, igual para todos los productos (también los importados)
+                    stockMinimo = STOCK_MINIMO_GLOBAL,
                     descripcion = description,
                     imagenUrl = imageUrl,
-                    userId = "local_user",
+                    userId = currentUserId,
                     fechaRegistro = System.currentTimeMillis()
                 )
-                productRepository.insertProduct(entity)
+                val newId = productRepository.insertProduct(entity)
+                val insertedEntity = entity.copy(id = newId.toInt())
+
+                // Sincroniza con Firestore en su propio try/catch silencioso: si falla
+                // (sin internet, error de red, etc.) el producto ya quedó guardado en Room
+                // y no se pierde, un fallo en la nube no debe bloquear la operación local
+                // syncProductToFirestore ya actualiza la fila local con el firestoreId generado
+                // antes de escribir en la nube, así que no hace falta un updateProduct manual aquí
+                try {
+                    productRepository.syncProductToFirestore(currentUserId, insertedEntity)
+                } catch (e: Exception) {
+                    // Se ignora silenciosamente: el dato local en Room ya está seguro
+                }
+
                 _uiState.value = _uiState.value.copy(productAdded = true)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

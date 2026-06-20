@@ -23,12 +23,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.techflow.app.R
+import com.techflow.app.data.local.STOCK_MINIMO_GLOBAL
 import com.techflow.app.domain.model.Product
 import com.techflow.app.ui.theme.PrimaryBlue
 import com.techflow.app.viewmodel.InventoryViewModel
 
 // ProductFormScreen - Pantalla 4 del expediente técnico (Formulario Agregar / Editar)
-// Campos: nombre, categoría (dropdown), marca, precio, cantidad, stock mínimo, descripción
+// Campos: nombre, categoría (dropdown), marca, precio, cantidad, stock mínimo (solo lectura), descripción
+// El stock mínimo se MUESTRA en el formulario pero es de solo lectura: su valor es fijo del sistema
+// (STOCK_MINIMO_GLOBAL) igual para todos los productos, el usuario no puede escribirlo ni cambiarlo
 // Validación de campos obligatorios antes de guardar
 // Si productId != null es edición (precarga datos), si es null es creación nueva
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +57,6 @@ fun ProductFormScreen(
     var marca by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("1") }
-    var stockMinimo by remember { mutableStateOf("5") }
     var descripcion by remember { mutableStateOf("") }
     // Estado para controlar el dropdown de categorías
     var expandedCategoria by remember { mutableStateOf(false) }
@@ -93,7 +95,6 @@ fun ProductFormScreen(
             marca = product.marca
             precio = product.precio.toString()
             cantidad = product.cantidad.toString()
-            stockMinimo = product.stockMinimo.toString()
             descripcion = product.descripcion ?: ""
             dataLoaded = true
         }
@@ -105,7 +106,6 @@ fun ProductFormScreen(
     val isMarcaValid = marca.isNotBlank()
     val isPrecioValid = precio.toDoubleOrNull() != null && precio.toDouble() > 0
     val isCantidadValid = cantidad.toIntOrNull() != null && cantidad.toInt() >= 0
-    val isStockMinimoValid = stockMinimo.toIntOrNull() != null && stockMinimo.toInt() >= 0
 
     Scaffold(
         containerColor = Color.Black,
@@ -284,16 +284,13 @@ fun ProductFormScreen(
                     singleLine = true,
                     colors = fieldColors
                 )
-                // Campo Stock Mínimo - cuando cantidad <= este valor se dispara la alerta
+                // Campo Stock Mínimo - de solo lectura, valor fijo del sistema (STOCK_MINIMO_GLOBAL)
+                // El usuario puede ver el valor pero no puede escribirlo ni modificarlo
                 OutlinedTextField(
-                    value = stockMinimo,
-                    onValueChange = { stockMinimo = it },
-                    label = { Text("Stock mín. *") },
-                    isError = showErrors && !isStockMinimoValid,
-                    supportingText = if (showErrors && !isStockMinimoValid) {
-                        { Text("Inválido") }
-                    } else null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    value = STOCK_MINIMO_GLOBAL.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Stock mín.") },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f),
                     singleLine = true,
@@ -322,7 +319,7 @@ fun ProductFormScreen(
                     showErrors = true
                     // Si todos los campos obligatorios son válidos, guarda el producto
                     if (isNombreValid && isCategoriaValid && isMarcaValid &&
-                        isPrecioValid && isCantidadValid && isStockMinimoValid
+                        isPrecioValid && isCantidadValid
                     ) {
                         val product = Product(
                             id = if (isEditing) productId!! else 0,
@@ -332,7 +329,8 @@ fun ProductFormScreen(
                             marca = marca.trim(),
                             precio = precio.toDouble(),
                             cantidad = cantidad.toInt(),
-                            stockMinimo = stockMinimo.toInt(),
+                            // Stock mínimo fijo del sistema, igual para todos los productos
+                            stockMinimo = STOCK_MINIMO_GLOBAL,
                             descripcion = descripcion.trim().ifBlank { null },
                             userId = "",
                             fechaRegistro = if (isEditing) uiState.selectedProduct?.fechaRegistro ?: System.currentTimeMillis() else System.currentTimeMillis()
