@@ -12,11 +12,17 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techflow.app.R
 import com.techflow.app.domain.model.Product
 import com.techflow.app.ui.theme.PrimaryBlue
 import com.techflow.app.viewmodel.InventoryViewModel
@@ -47,11 +53,13 @@ fun ProductFormScreen(
     var categoria by remember { mutableStateOf("") }
     var marca by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
-    var cantidad by remember { mutableStateOf("") }
-    var stockMinimo by remember { mutableStateOf("") }
+    var cantidad by remember { mutableStateOf("1") }
+    var stockMinimo by remember { mutableStateOf("5") }
     var descripcion by remember { mutableStateOf("") }
     // Estado para controlar el dropdown de categorías
     var expandedCategoria by remember { mutableStateOf(false) }
+    // Estado para controlar el dropdown de marcas
+    var expandedMarca by remember { mutableStateOf(false) }
     // Estado para mostrar errores de validación
     var showErrors by remember { mutableStateOf(false) }
     // Controla si ya se precargaron los datos en modo edición
@@ -60,15 +68,20 @@ fun ProductFormScreen(
     // Categorías disponibles según el expediente técnico
     val categorias = listOf("Laptop", "Celular", "Accesorio", "Componente", "Tablet", "Monitor", "Periférico", "Otro")
 
-    // Colores compartidos por todos los campos del formulario: borde y texto en azul/blanco vibrante
+    // Marcas tecnológicas disponibles
+    val marcas = listOf("Lenovo", "HP", "Dell", "Asus", "Acer", "Apple", "Samsung", "Logitech", "Razer", "MSI", "Huawei", "Xiaomi", "Sony", "LG", "Corsair", "HyperX", "Kingston", "Western Digital", "Seagate", "Otra")
+
+    // Colores corporativos de alto contraste para el formulario neón
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = PrimaryBlue,
-        unfocusedBorderColor = PrimaryBlue.copy(alpha = 0.6f),
-        focusedLabelColor = PrimaryBlue,
-        unfocusedLabelColor = PrimaryBlue.copy(alpha = 0.8f),
+        focusedBorderColor = Color.White,
+        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
         cursorColor = PrimaryBlue,
         focusedTextColor = Color.White,
-        unfocusedTextColor = Color.White
+        unfocusedTextColor = Color.White,
+        focusedContainerColor = Color.Black.copy(alpha = 0.6f),
+        unfocusedContainerColor = Color.Black.copy(alpha = 0.4f)
     )
 
     // Si es edición y el producto ya se cargó, precarga los campos
@@ -95,14 +108,23 @@ fun ProductFormScreen(
     val isStockMinimoValid = stockMinimo.toIntOrNull() != null && stockMinimo.toInt() >= 0
 
     Scaffold(
+        containerColor = Color.Black,
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Editar Producto" else "Nuevo Producto") },
+                title = {
+                    Text(
+                        text = if (isEditing) "Editar Producto" else "Nuevo Producto",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = "Volver",
+                            tint = Color.White
                         )
                     }
                 },
@@ -110,26 +132,33 @@ fun ProductFormScreen(
                     Icon(
                         imageVector = if (isEditing) Icons.Default.Edit else Icons.Default.AddCircle,
                         contentDescription = if (isEditing) "Editando producto" else "Nuevo producto",
+                        tint = Color.White,
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         }
     ) { paddingValues ->
-        // verticalScroll permite hacer scroll si el formulario es más largo que la pantalla
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.nuevoproducto),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.5f
+            )
+            // verticalScroll permite hacer scroll si el formulario es más largo que la pantalla
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
             // Campo Nombre - obligatorio
             OutlinedTextField(
                 value = nombre,
@@ -182,20 +211,42 @@ fun ProductFormScreen(
                 }
             }
 
-            // Campo Marca - obligatorio
-            OutlinedTextField(
-                value = marca,
-                onValueChange = { marca = it },
-                label = { Text("Marca *") },
-                isError = showErrors && !isMarcaValid,
-                supportingText = if (showErrors && !isMarcaValid) {
-                    { Text("La marca es obligatoria") }
-                } else null,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = fieldColors
-            )
+            // Campo Marca - dropdown con opciones predefinidas
+            ExposedDropdownMenuBox(
+                expanded = expandedMarca,
+                onExpandedChange = { expandedMarca = it }
+            ) {
+                OutlinedTextField(
+                    value = marca,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Marca *") },
+                    isError = showErrors && !isMarcaValid,
+                    supportingText = if (showErrors && !isMarcaValid) {
+                        { Text("Selecciona una marca") }
+                    } else null,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMarca) },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    colors = fieldColors
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedMarca,
+                    onDismissRequest = { expandedMarca = false }
+                ) {
+                    marcas.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                marca = option
+                                expandedMarca = false
+                            }
+                        )
+                    }
+                }
+            }
 
             // Campo Precio - solo números decimales
             OutlinedTextField(
@@ -318,6 +369,7 @@ fun ProductFormScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue)
             ) {
                 Text(text = "Cancelar")
+            }
             }
         }
     }

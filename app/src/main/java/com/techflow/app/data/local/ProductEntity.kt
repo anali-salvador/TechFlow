@@ -21,6 +21,7 @@ data class ProductEntity(
     val descripcion: String? = null,
     // userId - UID de Firebase Auth, asegura que cada usuario solo vea sus productos
     val userId: String = "",
+    val imagenUrl: String? = null,
     // fechaRegistro - timestamp en milisegundos para ordenar productos por fecha
     val fechaRegistro: Long = System.currentTimeMillis()
 )

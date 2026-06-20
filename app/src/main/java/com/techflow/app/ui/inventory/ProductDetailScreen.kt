@@ -1,5 +1,10 @@
 package com.techflow.app.ui.inventory
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -7,23 +12,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.techflow.app.R
 import com.techflow.app.domain.model.Product
 import com.techflow.app.ui.components.ConfirmDeleteDialog
 import com.techflow.app.ui.components.LoadingIndicator
@@ -32,16 +39,10 @@ import com.techflow.app.ui.components.StockBadge
 import com.techflow.app.ui.components.getCategoryColor
 import com.techflow.app.ui.components.getCategoryIcon
 import com.techflow.app.ui.theme.ErrorRed
-import com.techflow.app.ui.theme.OnSurfaceLight
-import com.techflow.app.ui.theme.OnSurfaceVariantLight
 import com.techflow.app.ui.theme.PrimaryBlue
-import com.techflow.app.ui.theme.SurfaceLight
+import com.techflow.app.ui.theme.SuccessGreen
 import com.techflow.app.viewmodel.InventoryViewModel
 
-// ProductDetailScreen - Pantalla 3 del expediente técnico
-// Muestra todos los campos del producto: nombre, categoría, marca, precio, cantidad, stockMinimo, descripción
-// Tiene botón Editar que navega al formulario y botón Eliminar con diálogo de confirmación
-// Indicador visual si el stock está por debajo del mínimo
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
@@ -50,8 +51,6 @@ fun ProductDetailScreen(
     onBackClick: () -> Unit,
     onEditClick: (Int) -> Unit
 ) {
-    // Carga el producto al entrar a la pantalla
-    // LaunchedEffect se ejecuta una sola vez cuando productId cambia
     LaunchedEffect(productId) {
         viewModel.loadProductById(productId)
     }
@@ -59,61 +58,65 @@ fun ProductDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val product: Product? = uiState.selectedProduct
 
-    // Estado para controlar si se muestra el diálogo de eliminar
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    // Diálogo de confirmación para eliminar
     if (showDeleteDialog && product != null) {
         ConfirmDeleteDialog(
             productName = product.nombre,
             onConfirm = {
                 viewModel.deleteProduct(product)
                 showDeleteDialog = false
-                onBackClick() // Vuelve a la lista después de eliminar
+                onBackClick()
             },
             onDismiss = { showDeleteDialog = false }
         )
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color(0xFF020617), // Negro OLED profundo
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Detalle del Producto",
+                        text = "Ficha Técnica",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PrimaryBlue
+                        color = Color.White
                     )
                 },
-                // Flecha para volver a la lista
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = OnSurfaceLight
+                            tint = Color.White
                         )
                     }
                 },
-                // Botones de editar y eliminar en la barra superior
                 actions = {
                     if (product != null) {
-                        IconButton(onClick = { onEditClick(product.id) }) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar",
-                                tint = OnSurfaceLight
-                            )
+                        FilledTonalIconButton(
+                            onClick = { onEditClick(product.id) },
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = PrimaryBlue.copy(alpha = 0.15f),
+                                contentColor = PrimaryBlue
+                            ),
+                            modifier = Modifier.size(38.dp).border(1.dp, PrimaryBlue.copy(alpha = 0.4f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Edit, "Editar", modifier = Modifier.size(18.dp))
                         }
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Eliminar",
-                                tint = OnSurfaceLight
-                            )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        FilledTonalIconButton(
+                            onClick = { showDeleteDialog = true },
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = ErrorRed.copy(alpha = 0.15f),
+                                contentColor = ErrorRed
+                            ),
+                            modifier = Modifier.size(38.dp).border(1.dp, ErrorRed.copy(alpha = 0.4f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Delete, "Eliminar", modifier = Modifier.size(18.dp))
                         }
+                        Spacer(modifier = Modifier.width(12.dp))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -125,178 +128,216 @@ fun ProductDetailScreen(
         if (product == null) {
             LoadingIndicator()
         } else {
-            val categoryColor = getCategoryColor(product.categoria)
             val isLowStock = product.cantidad <= product.stockMinimo
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Cabecera: ícono grande de la categoría, nombre del producto y badge de stock
-                StaggeredVisibility(index = 0, delayMs = 80L) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(72.dp),
-                            shape = CircleShape,
-                            color = categoryColor.copy(alpha = 0.2f)
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Fondo neón completo
+                Image(
+                    painter = painterResource(id = R.drawable.nuevoproducto),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.3f
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    // SECCIÓN: IMAGEN REAL DEL PRODUCTO (HÉROE)
+                    StaggeredVisibility(index = 0) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(260.dp)
+                                .padding(16.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = getCategoryIcon(product.categoria),
-                                    contentDescription = product.categoria,
-                                    tint = categoryColor,
-                                    modifier = Modifier.size(36.dp)
-                                )
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = PrimaryBlue),
+                                shape = RoundedCornerShape(32.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    AsyncImage(
+                                        model = getProductImageUrl(product),
+                                        contentDescription = product.nombre,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                    
+                                    // Overlay de categoría neón
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(16.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = getCategoryColor(product.categoria).copy(alpha = 0.8f)
+                                    ) {
+                                        Text(
+                                            text = product.categoria.uppercase(),
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color.White
+                                        )
+                                    }
+                                }
                             }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // SECCIÓN: INFO PRINCIPAL
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
                             text = product.nombre,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
                             color = Color.White,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        StockBadge(
-                            cantidad = product.cantidad,
-                            stockMinimo = product.stockMinimo
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = product.marca,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = PrimaryBlue,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(modifier = Modifier.size(4.dp).background(Color.White.copy(alpha = 0.3f), CircleShape))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            StockBadge(product.cantidad, product.stockMinimo)
+                        }
                     }
-                }
 
-                // Alerta visual si el stock está bajo (justo debajo del StockBadge)
-                if (isLowStock) {
-                    StaggeredVisibility(index = 1, delayMs = 80L) {
+                    // SECCIÓN: PRECIO DESTACADO
+                    StaggeredVisibility(index = 1) {
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.2f))
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = PrimaryBlue.copy(alpha = 0.1f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, PrimaryBlue.copy(alpha = 0.3f))
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.padding(20.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = null,
-                                    tint = ErrorRed,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(14.dp))
                                 Column {
+                                    Text("Precio Sugerido", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f))
                                     Text(
-                                        text = "Stock bajo",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold,
+                                        "S/. ${"%.2f".format(product.precio)}",
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Black,
                                         color = Color.White
                                     )
+                                }
+                                Icon(Icons.Default.Payments, null, tint = SuccessGreen, modifier = Modifier.size(40.dp))
+                            }
+                        }
+                    }
+
+                    // ALERTA DE STOCK (SI APLICA)
+                    if (isLowStock) {
+                        StaggeredVisibility(index = 2) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.15f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, ErrorRed)
+                            ) {
+                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.ReportProblem, null, tint = ErrorRed)
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text("¡Inventario Crítico! Reponer pronto.", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    // SECCIÓN: DETALLES TÉCNICOS
+                    Column(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("Especificaciones", color = Color.White.copy(alpha = 0.6f), fontWeight = FontWeight.Bold)
+                        
+                        DetailRow(Icons.Default.Inventory2, "Stock Disponible", "${product.cantidad} unidades")
+                        DetailRow(Icons.Default.NotificationsActive, "Alerta de Stock", "${product.stockMinimo} unidades")
+                        
+                        if (!product.descripcion.isNullOrBlank()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                            ) {
+                                Column(modifier = Modifier.padding(20.dp)) {
+                                    Text("Descripción", fontWeight = FontWeight.Bold, color = PrimaryBlue)
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "Quedan ${product.cantidad} unidades (mínimo: ${product.stockMinimo})",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = OnSurfaceVariantLight
+                                        text = product.descripcion!!,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        lineHeight = 22.sp
                                     )
                                 }
                             }
                         }
                     }
-                }
-
-                // Campos del producto en Cards individuales con ícono según el campo
-                StaggeredVisibility(index = 2, delayMs = 80L) {
-                    DetailFieldCard(icon = Icons.Default.Category, label = "Categoría", value = product.categoria)
-                }
-                StaggeredVisibility(index = 3, delayMs = 80L) {
-                    DetailFieldCard(icon = Icons.Default.Business, label = "Marca", value = product.marca)
-                }
-                StaggeredVisibility(index = 4, delayMs = 80L) {
-                    DetailFieldCard(icon = Icons.Default.Payments, label = "Precio", value = "S/. ${"%.2f".format(product.precio)}")
-                }
-                StaggeredVisibility(index = 5, delayMs = 80L) {
-                    DetailFieldCard(icon = Icons.Default.Inventory, label = "Cantidad en stock", value = "${product.cantidad} unidades")
-                }
-                StaggeredVisibility(index = 6, delayMs = 80L) {
-                    DetailFieldCard(icon = Icons.Default.Warning, label = "Stock mínimo", value = "${product.stockMinimo} unidades")
-                }
-
-                if (!product.descripcion.isNullOrBlank()) {
-                    StaggeredVisibility(index = 7, delayMs = 80L) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = SurfaceLight)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Descripción",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = OnSurfaceLight
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = product.descripcion,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = OnSurfaceVariantLight
-                                )
-                            }
-                        }
-                    }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         }
     }
 }
 
-// Card individual para mostrar un campo del producto con ícono circular, etiqueta y valor
 @Composable
-private fun DetailFieldCard(icon: ImageVector, label: String, value: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
+private fun DetailRow(icon: ImageVector, label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF1E293B).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape,
-                color = PrimaryBlue.copy(alpha = 0.15f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = PrimaryBlue,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = OnSurfaceVariantLight
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = OnSurfaceLight
-                )
-            }
-        }
+        Icon(icon, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(label, modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
+        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+}
+
+// Función inteligente para obtener una imagen real basada en la URL guardada o la categoría
+private fun getProductImageUrl(product: Product): String {
+    if (!product.imagenUrl.isNullOrBlank()) return product.imagenUrl
+
+    return when (product.categoria.lowercase()) {
+        "laptop" -> "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=800"
+        "celular" -> "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=800"
+        "accesorio", "periférico" -> "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=800"
+        "monitor" -> "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&q=80&w=800"
+        "tablet" -> "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=800"
+        "componente" -> "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=800"
+        else -> "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&q=80&w=800"
     }
 }

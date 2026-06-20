@@ -10,6 +10,7 @@ data class Product(
     val cantidad: Int = 0,
     val stockMinimo: Int = 0,
     val descripcion: String? = null,
+    val imagenUrl: String? = null,
     val userId: String = "",
     val fechaRegistro: Long = System.currentTimeMillis()
 )

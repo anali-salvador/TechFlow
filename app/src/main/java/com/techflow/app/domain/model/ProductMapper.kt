@@ -13,6 +13,7 @@ fun ProductEntity.toDomain(): Product {
         cantidad = cantidad,
         stockMinimo = stockMinimo,
         descripcion = descripcion,
+        imagenUrl = imagenUrl,
         userId = userId,
         fechaRegistro = fechaRegistro
     )
@@ -29,6 +30,7 @@ fun Product.toEntity(): ProductEntity {
         cantidad = cantidad,
         stockMinimo = stockMinimo,
         descripcion = descripcion,
+        imagenUrl = imagenUrl,
         userId = userId,
         fechaRegistro = fechaRegistro
     )

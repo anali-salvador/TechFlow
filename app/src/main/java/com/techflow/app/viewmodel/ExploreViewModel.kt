@@ -61,18 +61,19 @@ class ExploreViewModel @Inject constructor(
 
     // Agrega un producto de la API al inventario local en Room
     // Convierte ProductApiResponse a ProductEntity con los campos del expediente técnico
-    fun addProductToInventory(title: String, price: Double, description: String, category: String) {
+    fun addProductToInventory(title: String, price: Double, description: String, category: String, imageUrl: String) {
         viewModelScope.launch {
             try {
                 val entity = ProductEntity(
                     firestoreId = "",
                     nombre = title,
-                    categoria = "Electrónica",
+                    categoria = category,
                     marca = "Importado",
                     precio = price,
                     cantidad = 1,
                     stockMinimo = 1,
                     descripcion = description,
+                    imagenUrl = imageUrl,
                     userId = "local_user",
                     fechaRegistro = System.currentTimeMillis()
                 )

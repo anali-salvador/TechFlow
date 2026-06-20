@@ -1,65 +1,41 @@
 package com.techflow.app.ui.statistics
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.techflow.app.R
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.StaggeredVisibility
 import com.techflow.app.ui.components.StockBadge
 import com.techflow.app.ui.components.getCategoryColor
 import com.techflow.app.ui.theme.ErrorRed
-import com.techflow.app.ui.theme.OnSurfaceLight
+import com.techflow.app.ui.theme.PrimaryBlue
 import com.techflow.app.ui.theme.SuccessGreen
-import com.techflow.app.ui.theme.SurfaceLight
 import com.techflow.app.viewmodel.StatisticsViewModel
 
-// StatisticsScreen - Pantalla 6 del expediente técnico (Estadísticas)
-// Tarjeta con total de productos registrados
-// Tarjeta con cantidad de productos con stock bajo (resaltados en rojo)
-// Tarjeta con valor total estimado del inventario (suma de precio x cantidad)
-// Lista de productos en riesgo de stock con acceso rápido a su detalle
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun StatisticsScreen(
@@ -69,176 +45,128 @@ fun StatisticsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val infiniteTransition = rememberInfiniteTransition(label = "bg_anim")
+    val bgRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
     Scaffold(
+        containerColor = Color(0xFF020617),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Estadísticas",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold
+                        text = "Estadística 📊",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = "Volver",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = Color.Transparent
                 )
             )
         }
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> LoadingIndicator()
-            uiState.totalProducts == 0 -> {
-                EmptyStatisticsState(modifier = Modifier.padding(paddingValues))
+        Box(modifier = Modifier.fillMaxSize()) {
+            Canvas(modifier = Modifier.fillMaxSize().rotate(bgRotation)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(PrimaryBlue.copy(alpha = 0.1f), Color.Transparent),
+                        center = center
+                    ),
+                    radius = size.maxDimension / 1.5f
+                )
             }
-            else -> {
+
+            if (uiState.isLoading) {
+                LoadingIndicator()
+            } else if (uiState.totalProducts == 0) {
+                EmptyStatisticsState(modifier = Modifier.padding(paddingValues))
+            } else {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Banner ilustrativo de la sección de estadísticas
-                    item {
-                        Image(
-                            painter = painterResource(id = R.drawable.estadistica),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp)
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentScale = ContentScale.Crop,
-                            alpha = 0.6f
-                        )
-                    }
-
-                    // Tarjeta: Total de productos registrados
                     item {
                         StaggeredVisibility(index = 0) {
-                            StatCard(
-                                icon = Icons.Default.ShoppingCart,
-                                iconColor = MaterialTheme.colorScheme.primary,
-                                title = "Total de productos",
-                                value = "${uiState.totalProducts}",
-                                subtitle = "productos registrados en tu inventario"
+                            AnimatedCategoryChart(
+                                categoryData = uiState.categoryDistribution,
+                                totalItems = uiState.totalProducts
                             )
                         }
                     }
 
-                    // Tarjeta: Productos con stock bajo (resaltado en rojo)
                     item {
-                        StaggeredVisibility(index = 1) {
-                            StatCard(
-                                icon = Icons.Default.Warning,
-                                iconColor = if (uiState.lowStockCount > 0) ErrorRed else SuccessGreen,
-                                title = "Productos con stock bajo",
-                                value = "${uiState.lowStockCount}",
-                                subtitle = "productos con cantidad igual o menor al stock mínimo"
+                        Column {
+                            Text(
+                                "Resumen Rápido ⚡",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
-                        }
-                    }
-
-                    // Tarjeta: Valor total del inventario
-                    item {
-                        StaggeredVisibility(index = 2) {
-                            StatCard(
-                                icon = Icons.Default.Star,
-                                iconColor = SuccessGreen,
-                                title = "Valor total del inventario",
-                                value = "S/. ${"%.2f".format(uiState.totalInventoryValue)}",
-                                subtitle = "suma de precio × cantidad de cada producto"
-                            )
-                        }
-                    }
-
-                    // Gráfica Circular: Distribución por categorías
-                    if (uiState.categoryDistribution.isNotEmpty()) {
-                        item {
-                            StaggeredVisibility(index = 3) {
-                                CategoryDonutChart(
-                                    categoryData = uiState.categoryDistribution,
-                                    totalItems = uiState.totalProducts
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                MetricCard3D(
+                                    modifier = Modifier.weight(1f),
+                                    title = "Inventario 📦",
+                                    value = "${uiState.totalProducts}",
+                                    accentColor = PrimaryBlue
+                                )
+                                MetricCard3D(
+                                    modifier = Modifier.weight(1f),
+                                    title = "Stock Bajo ⚠️",
+                                    value = "${uiState.lowStockCount}",
+                                    accentColor = if (uiState.lowStockCount > 0) Color(0xFFFF3D00) else SuccessGreen
                                 )
                             }
                         }
                     }
 
-                    // Sección: Lista de productos en riesgo de stock
+                    item {
+                        StaggeredVisibility(index = 2) {
+                            GradientStatCard(
+                                title = "Valoración de Activos 💰",
+                                value = "S/. ${"%.2f".format(uiState.totalInventoryValue)}",
+                                subtitle = "Capital total invertido en tecnología",
+                                icon = Icons.Default.AccountBalanceWallet
+                            )
+                        }
+                    }
+
                     if (uiState.lowStockProducts.isNotEmpty()) {
                         item {
                             Text(
-                                text = "Productos en riesgo de stock",
+                                text = "Alertas Críticas 🚨",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(top = 8.dp)
+                                color = Color.White
                             )
                         }
 
-                        // Lista de productos con stock bajo con acceso rápido al detalle
                         itemsIndexed(uiState.lowStockProducts) { index, product ->
-                            StaggeredVisibility(index = index + 4) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { onProductClick(product.id) },
-                                    shape = RoundedCornerShape(20.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(12.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                                            // Ícono circular con la inicial de la categoría
-                                            val categoryColor = getCategoryColor(product.categoria)
-                                            Surface(
-                                                modifier = Modifier.size(40.dp),
-                                                shape = CircleShape,
-                                                color = categoryColor.copy(alpha = 0.18f)
-                                            ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Text(
-                                                        text = product.categoria.take(1).uppercase(),
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = categoryColor
-                                                    )
-                                                }
-                                            }
-                                            Spacer(modifier = Modifier.width(12.dp))
-                                            Column {
-                                                Text(
-                                                    text = product.nombre,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                                Text(
-                                                    text = "${product.categoria} · ${product.marca}",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-                                        StockBadge(
-                                            cantidad = product.cantidad,
-                                            stockMinimo = product.stockMinimo
-                                        )
-                                    }
-                                }
+                            StaggeredVisibility(index = index + 3) {
+                                GlassAlertCard(product, onProductClick)
                             }
                         }
                     }
@@ -248,42 +176,44 @@ fun StatisticsScreen(
     }
 }
 
-// Composable para la gráfica circular (Donut Chart) de categorías
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CategoryDonutChart(
+private fun AnimatedCategoryChart(
     categoryData: Map<String, Int>,
     totalItems: Int
 ) {
+    var animationPlayed by remember { mutableStateOf(false) }
+    val curSweepAngle by animateFloatAsState(
+        targetValue = if (animationPlayed) 1f else 0f,
+        animationSpec = tween(1500, easing = FastOutSlowInEasing),
+        label = "sweep"
+    )
+    LaunchedEffect(Unit) { animationPlayed = true }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B).copy(alpha = 0.8f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Distribución por Categorías",
-                style = MaterialTheme.typography.titleMedium,
+                "Distribución por Categoría 📂",
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
-                color = OnSurfaceLight,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Start
+                modifier = Modifier.fillMaxWidth()
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Box(
-                modifier = Modifier.size(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Box(contentAlignment = Alignment.Center) {
                 Canvas(modifier = Modifier.size(180.dp)) {
                     var startAngle = -90f
                     categoryData.forEach { (category, count) ->
-                        val sweepAngle = (count.toFloat() / totalItems) * 360f
+                        val sweepAngle = (count.toFloat() / totalItems) * 360f * curSweepAngle
                         drawArc(
                             color = getCategoryColor(category),
                             startAngle = startAngle,
@@ -291,49 +221,31 @@ private fun CategoryDonutChart(
                             useCenter = false,
                             style = Stroke(width = 35f, cap = StrokeCap.Round)
                         )
-                        startAngle += sweepAngle
+                        startAngle += (count.toFloat() / totalItems) * 360f
                     }
                 }
-                
+
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "$totalItems",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Total",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("$totalItems", fontSize = 42.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text("ITEMS TOTALES", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.4f))
                 }
             }
-
+            
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Leyenda de la gráfica
+            
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                maxItemsInEachRow = 3
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                categoryData.forEach { (category, count) ->
+                categoryData.forEach { (category, _) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
-                        Surface(
-                            modifier = Modifier.size(12.dp),
-                            shape = CircleShape,
-                            color = getCategoryColor(category)
-                        ) {}
+                        Box(modifier = Modifier.size(10.dp).background(getCategoryColor(category), CircleShape))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "$category ($count)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Text(category, fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -341,103 +253,109 @@ private fun CategoryDonutChart(
     }
 }
 
-// Composable reutilizable para las tarjetas de estadísticas
-// Ícono circular de color a la izquierda, fondo blanco con sombra, bordes redondeados de 20dp
 @Composable
-private fun StatCard(
-    icon: ImageVector,
-    iconColor: Color,
+private fun MetricCard3D(
+    modifier: Modifier = Modifier,
     title: String,
     value: String,
-    subtitle: String
+    accentColor: Color
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Box(
+                modifier = Modifier.size(40.dp).background(accentColor.copy(alpha = 0.1f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(title.takeLast(2))
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(value, fontSize = 32.sp, fontWeight = FontWeight.Black, color = Color.White)
+            Text(title.dropLast(2).uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = accentColor)
+        }
+    }
+}
+
+@Composable
+private fun GradientStatCard(
+    title: String,
+    value: String,
+    subtitle: String,
+    icon: ImageVector
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, SuccessGreen.copy(alpha = 0.2f))
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Ícono circular de color vibrante a la izquierda
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = CircleShape,
-                color = iconColor.copy(alpha = 0.18f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconColor,
-                        modifier = Modifier.size(26.dp)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(SuccessGreen.copy(alpha = 0.05f), Color.Transparent)
+                        )
                     )
+            )
+            
+            Row(
+                modifier = Modifier.padding(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(icon, null, tint = SuccessGreen, modifier = Modifier.size(32.dp))
+                Spacer(modifier = Modifier.width(20.dp))
+                Column {
+                    Text(title, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                    Text(value, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Text(subtitle, fontSize = 11.sp, color = SuccessGreen.copy(alpha = 0.7f))
                 }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = OnSurfaceLight
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = OnSurfaceLight
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
 }
 
-// Estado vacío ilustrativo cuando no hay productos registrados todavía
+@Composable
+private fun GlassAlertCard(product: com.techflow.app.domain.model.Product, onClick: (Int) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { onClick(product.id) },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF450a0a).copy(alpha = 0.4f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF991b1b).copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(44.dp).background(Color(0xFF991b1b).copy(alpha = 0.2f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("💥")
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(product.nombre, color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Stock Insuficiente", color = Color(0xFFf87171), fontSize = 12.sp)
+            }
+            StockBadge(product.cantidad, product.stockMinimo)
+        }
+    }
+}
+
 @Composable
 private fun EmptyStatisticsState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Surface(
-                modifier = Modifier.size(96.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Aún no hay estadísticas",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Agrega productos a tu inventario\npara ver tus estadísticas aquí",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            Text("🔭", fontSize = 64.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Sin datos aún", color = Color.White, fontWeight = FontWeight.Bold)
+            Text("Agrega productos para ver la magia ✨", color = Color.White.copy(alpha = 0.5f))
         }
     }
 }

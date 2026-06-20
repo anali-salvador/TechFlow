@@ -27,7 +27,8 @@ object DatabaseModule {
             context,
             TechFlowDatabase::class.java,
             "techflow_database" // nombre del archivo de la base de datos en el dispositivo
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     // @Provides - le dice a Hilt CÓMO obtener el DAO a partir de la base de datos
