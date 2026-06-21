@@ -91,6 +91,9 @@ dependencies {
     // Coil - carga imágenes desde URLs en los productos
     implementation(libs.coil.compose)
 
+    // Lottie Compose - reproduce la animación del robot en la pantalla de bienvenida
+    implementation(libs.lottie.compose)
+
     // Firebase BOM - asegura que todas las librerías Firebase usen versiones compatibles entre sí
     implementation(platform(libs.firebase.bom))
     // Firebase Authentication KTX - registro, login, persistencia de sesión y cierre de sesión

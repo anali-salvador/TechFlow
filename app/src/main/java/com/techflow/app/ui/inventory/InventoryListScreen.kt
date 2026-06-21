@@ -16,13 +16,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.techflow.app.R
 import com.techflow.app.ui.components.ErrorMessage
 import com.techflow.app.ui.components.LoadingIndicator
@@ -137,7 +140,6 @@ fun InventoryListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(20.dp))
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.fondo),
@@ -196,6 +198,20 @@ fun InventoryListScreen(
                             )
                         }
                     }
+
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.robot_animation))
+                    val progress by animateLottieCompositionAsState(
+                        composition = composition,
+                        iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever
+                    )
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier
+                            .size(80.dp)
+                            .align(Alignment.TopEnd)
+                            .padding(top = 12.dp, end = 12.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }

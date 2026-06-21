@@ -17,6 +17,7 @@ lifecycleViewModel = "2.8.7"
 coroutines = "1.9.0"
 coil = "2.7.0"
 firebase-bom = "33.7.0"
+lottie = "6.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,6 +72,9 @@ coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 
 # Coil Compose - carga imágenes desde URLs de forma asíncrona en Jetpack Compose
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# Lottie Compose - reproduce animaciones JSON (After Effects) dentro de Composables
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 # Firebase BOM - controla las versiones de todos los productos Firebase de forma consistente
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }

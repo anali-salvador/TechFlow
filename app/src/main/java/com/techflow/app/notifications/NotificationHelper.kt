@@ -8,12 +8,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.techflow.app.MainActivity
 import com.techflow.app.data.local.NotificationDao
 import com.techflow.app.data.local.NotificationEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,6 +31,13 @@ import javax.inject.Singleton
 class NotificationHelper @Inject constructor(
     private val notificationDao: NotificationDao
 ) {
+
+    // Scope propio del singleton, independiente del viewModelScope de quien llame a
+    // showLowStockNotification. InventoryViewModel se destruye apenas el usuario navega de
+    // vuelta a la lista tras guardar un producto (ProductFormScreen hace addProduct/updateProduct
+    // y onBackClick() en el mismo instante, sin esperar), lo que cancela su viewModelScope antes
+    // de que el insert en Room llegue a ejecutarse. Este scope vive mientras viva la app, no la pantalla.
+    private val notificationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     companion object {
         // ID del canal de notificaciones - debe ser único y estable entre versiones de la app
@@ -55,12 +67,13 @@ class NotificationHelper @Inject constructor(
 
     // Muestra la notificación de stock bajo para un producto específico (RF16)
     // productId - se usa tanto para abrir el detalle correcto (RF17) como para el ID único de la notificación
-    // suspend - además de mostrar la notificación del sistema, guarda un registro en el
-    // historial local (NotificationEntity) para la pantalla de historial de notificaciones
-    suspend fun showLowStockNotification(context: Context, productId: Int, productName: String, cantidad: Int) {
+    // Ya no es suspend: notify() es una llamada síncrona, y el guardado en el historial se lanza
+    // en notificationScope (propio del singleton) en vez de heredar el Job de quien llama, para
+    // que sobreviva aunque el caller (ej. InventoryViewModel) se destruya justo después de invocarla
+    fun showLowStockNotification(context: Context, productId: Int, productName: String, cantidad: Int) {
 
-        val title = "Stock bajo: $productName"
-        val body = "Quedan $cantidad unidades. Toca para ver el detalle."
+        val title = "⚠ Alerta de inventario"
+        val body = "$productName está por agotarse. Quedan solo $cantidad unidades disponibles. Te recomendamos reabastecer pronto."
 
         // RF17 - Intent hacia MainActivity con el ID del producto como extra
         // Al abrir la app desde la notificación, se puede leer "productId" y navegar al detalle
@@ -106,12 +119,20 @@ class NotificationHelper @Inject constructor(
         NotificationManagerCompat.from(context).notify(productId, notification)
 
         // Guarda el registro en el historial local de notificaciones (funcionalidad extra)
-        notificationDao.insertNotification(
-            NotificationEntity(
-                title = title,
-                body = body,
-                productId = productId
-            )
-        )
+        // Lanzado en notificationScope (no en el caller): así el insert termina aunque la
+        // pantalla que disparó la notificación ya haya navegado y destruido su propio ViewModel
+        notificationScope.launch {
+            try {
+                notificationDao.insertNotification(
+                    NotificationEntity(
+                        title = title,
+                        body = body,
+                        productId = productId
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e("NotificationHelper", "Error al guardar notificación en historial", e)
+            }
+        }
     }
 }
