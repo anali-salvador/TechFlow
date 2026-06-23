@@ -35,6 +35,7 @@ import com.techflow.app.ui.theme.HealthyStockGreen
 import com.techflow.app.ui.theme.LowStockOrange
 import com.techflow.app.ui.theme.OnSurfaceVariantLight
 import com.techflow.app.ui.theme.PrimaryBlue
+import com.techflow.app.util.extraerNombreDesdeCorreo
 import com.techflow.app.viewmodel.InventoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +50,10 @@ fun InventoryListScreen(
     onNotificationsClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Obtención automática del nombre del usuario desde Firebase Auth
+    val userEmail = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email
+    val nombreUsuario = remember(userEmail) { extraerNombreDesdeCorreo(userEmail) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -155,20 +160,15 @@ fun InventoryListScreen(
                             .padding(20.dp)
                     ) {
                         Text(
-                            text = "Bienvenido a",
+                            text = "¡Hola, $nombreUsuario!",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF22D3EE)
+                        )
+                        Text(
+                            text = "Gestiona tu stock de forma inteligente",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = OnSurfaceVariantLight
-                        )
-                        Text(
-                            text = "TechFlow",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryBlue
-                        )
-                        Text(
-                            text = "Gestión de Inventario Tecnológico",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = OnSurfaceVariantLight
+                            color = Color.White.copy(alpha = 0.6f)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(

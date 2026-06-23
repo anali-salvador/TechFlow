@@ -1,5 +1,6 @@
 package com.techflow.app.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,7 +10,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -17,7 +17,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,16 +28,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.techflow.app.ui.theme.BackgroundLight
-import com.techflow.app.ui.theme.OnSurfaceLight
-import com.techflow.app.ui.theme.OnSurfaceVariantLight
+import com.techflow.app.R
+import com.techflow.app.ui.components.CircuitBackground
 import com.techflow.app.ui.theme.PrimaryBlue
-import com.techflow.app.ui.theme.SurfaceLight
 import com.techflow.app.viewmodel.AuthViewModel
 
-// LoginScreen - Pantalla 1 del expediente técnico (Parte 2 - Autenticación)
-// Permite iniciar sesión con correo y contraseña a través de Firebase Authentication (RF02)
-// Si ya hay una sesión activa o el login es exitoso, navega al inventario (RF03)
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
@@ -43,44 +41,37 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Estados locales del formulario, independientes del UiState del ViewModel
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    // Controla si la contraseña se muestra en texto plano o oculta con puntos
     var passwordVisible by remember { mutableStateOf(false) }
-    // Controla si ya se intentó enviar el formulario, para mostrar errores de validación
     var showErrors by remember { mutableStateOf(false) }
 
-    // Validación de formato de correo: debe contener "@" y "."
     val isEmailValid = email.contains("@") && email.contains(".")
     val isPasswordValid = password.isNotBlank()
 
-    // RF03 (Persistencia de sesión) - cuando isAuthenticated pasa a true (login exitoso
-    // o sesión ya activa detectada por el ViewModel), navega automáticamente al inventario
     LaunchedEffect(uiState.isAuthenticated) {
         if (uiState.isAuthenticated) {
             onLoginSuccess()
         }
     }
 
-    // Colores de los campos siguiendo la identidad visual PrimaryBlue de la app (ProductFormScreen)
+    // Colores corporativos de alto contraste para el login neón
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = PrimaryBlue,
-        unfocusedBorderColor = PrimaryBlue.copy(alpha = 0.5f),
-        focusedLabelColor = PrimaryBlue,
-        unfocusedLabelColor = OnSurfaceVariantLight,
+        focusedBorderColor = Color.White,
+        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
         cursorColor = PrimaryBlue,
-        focusedTextColor = OnSurfaceLight,
-        unfocusedTextColor = OnSurfaceLight,
-        focusedContainerColor = SurfaceLight,
-        unfocusedContainerColor = SurfaceLight
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White,
+        focusedContainerColor = Color.Black.copy(alpha = 0.6f),
+        unfocusedContainerColor = Color.Black.copy(alpha = 0.4f)
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Fondo animado de circuitos
+        CircuitBackground(modifier = Modifier.fillMaxSize())
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -88,51 +79,43 @@ fun LoginScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
-            // Logo - círculo grande con el icono representativo de inventario
-            Box(
+            // Logo TechFlow - Imagen actualizada con brillo neón circular
+            Image(
+                painter = painterResource(id = R.drawable.login),
+                contentDescription = "Logo TechFlow",
                 modifier = Modifier
-                    .size(96.dp)
-                    .background(PrimaryBlue.copy(alpha = 0.18f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Inventory2,
-                    contentDescription = null,
-                    tint = PrimaryBlue,
-                    modifier = Modifier.size(48.dp)
-                )
-            }
+                    .size(160.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Título de la app
             Text(
                 text = "TechFlow",
-                color = PrimaryBlue,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold
+                color = Color.White,
+                fontSize = 38.sp,
+                fontWeight = FontWeight.ExtraBold
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Subtítulo descriptivo
             Text(
                 text = "Gestión de Inventario Tecnológico",
-                color = OnSurfaceVariantLight,
+                color = Color.White.copy(alpha = 0.6f),
                 fontSize = 14.sp
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Campo Correo - valida que contenga "@" y "."
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Correo electrónico") },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Email, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Email, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
                 },
                 isError = showErrors && !isEmailValid,
                 supportingText = if (showErrors && !isEmailValid) {
@@ -147,19 +130,19 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Campo Contraseña - con botón para mostrar/ocultar el texto ingresado
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
                 },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                            tint = Color.White.copy(alpha = 0.7f)
                         )
                     }
                 },
@@ -175,8 +158,6 @@ fun LoginScreen(
                 colors = fieldColors
             )
 
-            // RF05 (Errores de autenticación) - mensaje visible si el login falla
-            // (credenciales incorrectas, correo inválido, sin conexión, etc.)
             if (uiState.errorMessage != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -186,9 +167,8 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón Iniciar sesión - valida el formulario y llama a viewModel.login()
             Button(
                 onClick = {
                     showErrors = true
@@ -200,7 +180,7 @@ fun LoginScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimaryBlue,
                     contentColor = Color.White
@@ -213,17 +193,16 @@ fun LoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(text = "Iniciar sesión", style = MaterialTheme.typography.titleMedium)
+                    Text(text = "Iniciar sesión", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Acceso a la pantalla de Registro para usuarios nuevos
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "¿No tienes cuenta?",
-                    color = OnSurfaceVariantLight,
+                    color = Color.White.copy(alpha = 0.7f),
                     fontSize = 14.sp
                 )
                 TextButton(onClick = onNavigateToRegister) {
