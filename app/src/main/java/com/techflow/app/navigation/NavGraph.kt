@@ -15,6 +15,7 @@ import com.techflow.app.ui.inventory.InventoryListScreen
 import com.techflow.app.ui.inventory.ProductDetailScreen
 import com.techflow.app.ui.inventory.ProductFormScreen
 import com.techflow.app.ui.notifications.NotificationHistoryScreen
+import com.techflow.app.ui.profile.ProfileScreen
 import com.techflow.app.ui.statistics.StatisticsScreen
 import com.techflow.app.viewmodel.AuthViewModel
 
@@ -87,6 +88,25 @@ fun NavGraph(navController: NavHostController, initialProductId: Int = -1) {
                 },
                 onNotificationsClick = {
                     navController.navigate(AppScreens.NotificationHistory.route)
+                },
+                onProfileClick = {
+                    navController.navigate(AppScreens.Profile.route)
+                }
+            )
+        }
+
+        // Pantalla de Perfil de usuario (solo lectura)
+        composable(route = AppScreens.Profile.route) {
+            // AuthViewModel propio de esta entrada del backstack, solo para cerrar sesión
+            val authViewModel: AuthViewModel = hiltViewModel()
+            ProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onLogoutClick = {
+                    // Mismo patrón de logout que ya usa InventoryListScreen
+                    authViewModel.logout()
+                    navController.navigate(AppScreens.Login.route) {
+                        popUpTo(AppScreens.InventoryList.route) { inclusive = true }
+                    }
                 }
             )
         }

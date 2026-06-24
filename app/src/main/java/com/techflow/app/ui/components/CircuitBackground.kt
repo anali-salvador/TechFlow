@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -16,49 +17,82 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
+// Definición de una ruta de circuito: lista de puntos (fracción de w, fracción de h) y duración de su flujo animado
+private data class CircuitRoute(val points: List<Pair<Float, Float>>, val durationMs: Int)
+
 @Composable
 fun CircuitBackground(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "circuit_anim")
 
-    // Animación de flujo de datos (Fase del punteado)
-    val phase1 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 100f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "p1"
-    )
-    val phase2 by infiniteTransition.animateFloat(
-        initialValue = 100f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "p2"
-    )
-    val phase3 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 100f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(9000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "p3"
-    )
+    // 9 rutas tipo circuito (ángulos rectos) distribuidas en toda la altura: arriba, medio y abajo
+    val routes = remember {
+        listOf(
+            // Zona superior
+            CircuitRoute(listOf(0.08f to 0f, 0.08f to 0.12f, 0.30f to 0.12f, 0.30f to 0.30f), 6200),
+            CircuitRoute(listOf(0.45f to 0f, 0.45f to 0.10f, 0.60f to 0.10f, 0.60f to 0.22f), 7000),
+            CircuitRoute(listOf(0.95f to 0f, 0.95f to 0.06f, 0.78f to 0.06f, 0.78f to 0.18f), 6400),
+            // Ruta larga que cruza de arriba hacia abajo
+            CircuitRoute(listOf(1f to 0.08f, 0.72f to 0.08f, 0.72f to 0.28f, 0.88f to 0.28f, 0.88f to 1f), 9400),
+            // Zona media
+            CircuitRoute(listOf(0f to 0.45f, 0.15f to 0.45f, 0.15f to 0.55f, 0.35f to 0.55f, 0.35f to 0.40f), 6800),
+            CircuitRoute(listOf(1f to 0.50f, 0.80f to 0.50f, 0.80f to 0.35f, 0.92f to 0.35f), 9800),
+            // Zona inferior
+            CircuitRoute(listOf(0f to 0.88f, 0.22f to 0.88f, 0.22f to 0.62f, 0.50f to 0.62f, 0.50f to 1f), 8200),
+            CircuitRoute(listOf(1f to 0.92f, 0.65f to 0.92f, 0.65f to 0.75f, 0.40f to 0.75f), 7600),
+            CircuitRoute(listOf(0.30f to 1f, 0.30f to 0.85f, 0.10f to 0.85f, 0.10f to 0.70f), 10000)
+        )
+    }
 
-    // Animación de pulso para los nodos
-    val nodeAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "nodes"
-    )
+    // Fase de flujo (dasharray animado) por ruta, cada una con su propia duración
+    val phases = routes.map { route ->
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 100f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(route.durationMs, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "phase_${route.durationMs}"
+        )
+    }
+
+    // 20 nodos en intersecciones de las rutas, repartidos por toda la pantalla
+    val nodePositions = remember {
+        listOf(
+            0.08f to 0.12f, 0.30f to 0.12f,
+            0.45f to 0.10f, 0.60f to 0.10f,
+            0.95f to 0.06f, 0.78f to 0.06f,
+            0.72f to 0.08f, 0.72f to 0.28f, 0.88f to 0.28f,
+            0.15f to 0.45f, 0.15f to 0.55f, 0.35f to 0.55f,
+            0.80f to 0.50f, 0.80f to 0.35f,
+            0.22f to 0.88f, 0.22f to 0.62f, 0.50f to 0.62f,
+            0.65f to 0.92f, 0.65f to 0.75f,
+            0.30f to 0.85f
+        )
+    }
+
+    // Delay distinto por nodo para que el pulso no se vea sincronizado
+    val nodeAlphas = nodePositions.mapIndexed { index, _ ->
+        infiniteTransition.animateFloat(
+            initialValue = 0.4f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(3000),
+                repeatMode = RepeatMode.Reverse,
+                initialStartOffset = StartOffset(index * 180)
+            ),
+            label = "node_$index"
+        )
+    }
+
+    // Líneas verticales cortas de relleno (sin nodos, más sutiles, color más oscuro)
+    val fillerLines = remember {
+        listOf(
+            Triple(0.18f, 0.05f, 0.28f),
+            Triple(0.62f, 0.55f, 0.80f),
+            Triple(0.40f, 0.78f, 0.95f)
+        )
+    }
 
     Box(
         modifier = modifier
@@ -74,63 +108,46 @@ fun CircuitBackground(modifier: Modifier = Modifier) {
             val h = size.height
             val pathColor = Color(0xFF1D5A6E)
             val nodeColor = Color(0xFF22D3EE)
+            val fillerColor = Color(0xFF11313D)
             val stroke = 1.4.dp.toPx()
 
-            // Ruta 1: Superior Izquierda -> Centro
-            val p1 = Path().apply {
-                moveTo(w * 0.1f, 0f)
-                lineTo(w * 0.1f, h * 0.15f)
-                lineTo(w * 0.4f, h * 0.15f)
-                lineTo(w * 0.4f, h * 0.45f)
-            }
-            drawPath(
-                path = p1,
-                color = pathColor,
-                style = Stroke(
-                    width = stroke,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 12f), phase1)
+            // Rutas principales del circuito
+            routes.forEachIndexed { index, route ->
+                val path = Path().apply {
+                    route.points.forEachIndexed { pointIndex, (xFrac, yFrac) ->
+                        if (pointIndex == 0) moveTo(w * xFrac, h * yFrac) else lineTo(w * xFrac, h * yFrac)
+                    }
+                }
+                drawPath(
+                    path = path,
+                    color = pathColor,
+                    style = Stroke(
+                        width = stroke,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 12f), phases[index].value)
+                    )
                 )
-            )
-
-            // Ruta 2: Derecha -> Abajo
-            val p2 = Path().apply {
-                moveTo(w, h * 0.1f)
-                lineTo(w * 0.7f, h * 0.1f)
-                lineTo(w * 0.7f, h * 0.4f)
-                lineTo(w * 0.85f, h * 0.4f)
-                lineTo(w * 0.85f, h)
             }
-            drawPath(
-                path = p2,
-                color = pathColor,
-                style = Stroke(
-                    width = stroke,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 12f), phase2)
-                )
-            )
 
-            // Ruta 3: Inferior Izquierda -> Arriba
-            val p3 = Path().apply {
-                moveTo(0f, h * 0.85f)
-                lineTo(w * 0.25f, h * 0.85f)
-                lineTo(w * 0.25f, h * 0.6f)
-                lineTo(w * 0.55f, h * 0.6f)
-                lineTo(w * 0.55f, h)
+            // Líneas verticales de relleno, estáticas y más sutiles
+            fillerLines.forEach { (xFrac, yStartFrac, yEndFrac) ->
+                drawLine(
+                    color = fillerColor,
+                    start = Offset(w * xFrac, h * yStartFrac),
+                    end = Offset(w * xFrac, h * yEndFrac),
+                    strokeWidth = 1.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 10f), 0f)
+                )
             }
-            drawPath(
-                path = p3,
-                color = pathColor,
-                style = Stroke(
-                    width = stroke,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 12f), phase3)
-                )
-            )
 
-            // Nodos (Puntos de luz en intersecciones)
-            drawCircle(nodeColor, 2.5.dp.toPx(), Offset(w * 0.1f, h * 0.15f), alpha = nodeAlpha)
-            drawCircle(nodeColor, 2.5.dp.toPx(), Offset(w * 0.7f, h * 0.4f), alpha = nodeAlpha * 0.8f)
-            drawCircle(nodeColor, 2.5.dp.toPx(), Offset(w * 0.25f, h * 0.85f), alpha = nodeAlpha * 0.6f)
-            drawCircle(nodeColor, 2.5.dp.toPx(), Offset(w * 0.55f, h * 0.6f), alpha = nodeAlpha)
+            // Nodos (puntos de luz en intersecciones), cada uno con su propio pulso
+            nodePositions.forEachIndexed { index, (xFrac, yFrac) ->
+                drawCircle(
+                    color = nodeColor,
+                    radius = 2.5.dp.toPx(),
+                    center = Offset(w * xFrac, h * yFrac),
+                    alpha = nodeAlphas[index].value
+                )
+            }
         }
     }
 }

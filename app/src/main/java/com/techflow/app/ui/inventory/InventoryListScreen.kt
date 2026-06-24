@@ -1,26 +1,37 @@
 package com.techflow.app.ui.inventory
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -48,6 +59,7 @@ fun InventoryListScreen(
     onStatisticsClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onNotificationsClick: () -> Unit,
+    onProfileClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -60,34 +72,115 @@ fun InventoryListScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "TechFlow",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(Color(0xFF22D3EE).copy(alpha = 0.12f))
+                                .border(1.dp, Color(0xFF22D3EE).copy(alpha = 0.3f), RoundedCornerShape(7.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Memory,
+                                contentDescription = null,
+                                tint = Color(0xFF22D3EE),
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "TechFlow",
+                            color = Color(0xFF22D3EE),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 17.sp,
+                            letterSpacing = 0.3.sp
+                        )
+                    }
                 },
                 actions = {
                     // Historial de notificaciones (funcionalidad extra)
-                    IconButton(onClick = onNotificationsClick) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
+                            .clickable(onClick = onNotificationsClick),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notificaciones",
-                            tint = Color.White
+                            tint = Color(0xFF9FB3C2),
+                            modifier = Modifier.size(17.dp)
+                        )
+                        // Punto de no leídas - InventoryUiState aún no expone un conteo real,
+                        // así que por ahora queda siempre visible
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .align(Alignment.TopEnd)
+                                .offset(x = 2.dp, y = (-2).dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF22D3EE))
                         )
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    // Perfil de usuario (solo lectura)
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
+                            .clickable(onClick = onProfileClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Mi perfil",
+                            tint = Color(0xFF9FB3C2),
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     // Cerrar sesión - cierra la sesión de Firebase Auth y vuelve a Login
-                    IconButton(onClick = onLogoutClick) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFE24B4A).copy(alpha = 0.10f))
+                            .border(0.5.dp, Color(0xFFE24B4A).copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+                            .clickable(onClick = onLogoutClick),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Cerrar sesión",
-                            tint = Color.White
+                            tint = Color(0xFFE57C7C),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent
-                )
+                ),
+                modifier = Modifier
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color(0xFF0E2030), Color(0xFF0B1622))
+                        )
+                    )
+                    .drawBehind {
+                        drawLine(
+                            color = Color(0xFF22D3EE).copy(alpha = 0.12f),
+                            start = Offset(0f, size.height),
+                            end = Offset(size.width, size.height),
+                            strokeWidth = 0.5.dp.toPx()
+                        )
+                    }
             )
         },
         bottomBar = {

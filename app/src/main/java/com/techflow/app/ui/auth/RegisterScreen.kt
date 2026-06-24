@@ -88,6 +88,7 @@ fun RegisterScreen(
                 contentDescription = "Logo TechFlow",
                 modifier = Modifier
                     .size(160.dp)
+                    .offset(y = (-10).dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )

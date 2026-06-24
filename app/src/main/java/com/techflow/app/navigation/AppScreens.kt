@@ -37,4 +37,7 @@ sealed class AppScreens(val route: String) {
 
     // Pantalla de historial de notificaciones (funcionalidad extra)
     object NotificationHistory : AppScreens("notification_history")
+
+    // Pantalla de perfil de usuario de solo lectura
+    object Profile : AppScreens("profile")
 }
