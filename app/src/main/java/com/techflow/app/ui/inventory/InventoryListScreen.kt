@@ -224,12 +224,23 @@ fun InventoryListScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.nuevoproducto),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f)
+                    .align(Alignment.BottomCenter),
+                contentScale = ContentScale.Crop,
+                alpha = 0.5f
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
             item {
                 val lowStockCount = uiState.products.count { it.cantidad <= it.stockMinimo }
                 val totalValue = uiState.products.sumOf { it.precio * it.cantidad }
@@ -377,6 +388,7 @@ fun InventoryListScreen(
                     }
                 }
             }
+        }
         }
     }
 }

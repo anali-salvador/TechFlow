@@ -1,5 +1,6 @@
 package com.techflow.app.ui.notifications
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,11 +20,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techflow.app.R
 import com.techflow.app.data.local.NotificationEntity
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.theme.OnSurfaceLight
@@ -83,6 +87,14 @@ fun NotificationHistoryScreen(
             )
         }
     ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.nuevoproducto),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f
+        )
         when {
             uiState.isLoading -> {
                 Box(
@@ -141,6 +153,7 @@ fun NotificationHistoryScreen(
                     }
                 }
             }
+        }
         }
     }
 }

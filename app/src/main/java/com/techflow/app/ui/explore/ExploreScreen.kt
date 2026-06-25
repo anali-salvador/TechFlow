@@ -86,14 +86,11 @@ fun ExploreScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(id = R.drawable.fondo),
+                painter = painterResource(id = R.drawable.nuevoproducto),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .align(Alignment.TopCenter),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                alpha = 0.25f
+                alpha = 0.5f
             )
             Column(
                 modifier = Modifier

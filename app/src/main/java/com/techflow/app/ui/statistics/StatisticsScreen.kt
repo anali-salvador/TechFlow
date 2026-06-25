@@ -2,6 +2,7 @@ package com.techflow.app.ui.statistics
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,10 +24,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techflow.app.R
 import com.techflow.app.ui.components.LoadingIndicator
 import com.techflow.app.ui.components.StaggeredVisibility
 import com.techflow.app.ui.components.StockBadge
@@ -84,6 +88,13 @@ fun StatisticsScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.nuevoproducto),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.5f
+            )
             Canvas(modifier = Modifier.fillMaxSize().rotate(bgRotation)) {
                 drawCircle(
                     brush = Brush.radialGradient(

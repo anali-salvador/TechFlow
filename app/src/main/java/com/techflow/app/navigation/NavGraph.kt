@@ -1,7 +1,6 @@
 package com.techflow.app.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.techflow.app.ui.auth.LoginScreen
 import com.techflow.app.ui.auth.RegisterScreen
+import com.techflow.app.ui.splash.SplashScreen
 import com.techflow.app.ui.explore.ExploreScreen
 import com.techflow.app.ui.inventory.InventoryListScreen
 import com.techflow.app.ui.inventory.ProductDetailScreen
@@ -29,8 +29,31 @@ fun NavGraph(navController: NavHostController, initialProductId: Int = -1) {
 
     NavHost(
         navController = navController,
-        startDestination = AppScreens.Login.route
+        startDestination = AppScreens.Splash.route
     ) {
+        // Splash Screen — punto de entrada; decide a dónde navegar según sesión activa
+        composable(route = AppScreens.Splash.route) {
+            val authViewModel: AuthViewModel = hiltViewModel()
+            SplashScreen(
+                onSplashFinished = {
+                    val isLoggedIn = authViewModel.uiState.value.isAuthenticated
+                    if (isLoggedIn) {
+                        navController.navigate(AppScreens.InventoryList.route) {
+                            popUpTo(AppScreens.Splash.route) { inclusive = true }
+                        }
+                        // RF17 - si se abrió desde notificación de stock bajo, va directo al detalle
+                        if (initialProductId != -1) {
+                            navController.navigate(AppScreens.ProductDetail.createRoute(initialProductId))
+                        }
+                    } else {
+                        navController.navigate(AppScreens.Login.route) {
+                            popUpTo(AppScreens.Splash.route) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
+
         // Pantalla de Login - Parte 2 (Firebase Authentication)
         composable(route = AppScreens.Login.route) {
             LoginScreen(
@@ -178,11 +201,4 @@ fun NavGraph(navController: NavHostController, initialProductId: Int = -1) {
         }
     }
 
-    // RF17 - al tocar la notificación de stock bajo, navega automáticamente al detalle
-    // del producto afectado. Solo se ejecuta una vez al iniciar (initialProductId no cambia)
-    LaunchedEffect(initialProductId) {
-        if (initialProductId != -1) {
-            navController.navigate(AppScreens.ProductDetail.createRoute(initialProductId))
-        }
-    }
 }

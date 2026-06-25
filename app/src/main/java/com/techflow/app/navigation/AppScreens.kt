@@ -40,4 +40,7 @@ sealed class AppScreens(val route: String) {
 
     // Pantalla de perfil de usuario de solo lectura
     object Profile : AppScreens("profile")
+
+    // Pantalla de presentación (se muestra 1.8s al arrancar)
+    object Splash : AppScreens("splash")
 }
