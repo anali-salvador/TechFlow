@@ -2,7 +2,7 @@
 
 ## Equipo
 - **Anali Salvador Advíncula**
-- **Eder Carrasco Oscco**
+- **Ederd Carrasco Oscco**
 
 ## Temática
 Aplicación móvil Android para la gestión de inventario de productos tecnológicos (laptops, celulares, accesorios, componentes), dirigida a técnicos independientes y pequeños negocios del rubro tecnológico.
